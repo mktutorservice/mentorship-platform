@@ -31,25 +31,20 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Refresh auth token session
+  // Refresh auth session
   const { data: { user } } = await supabase.auth.getUser();
-
   const { pathname } = request.nextUrl;
 
-  // Define public auth routes
-  const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/verify-email');
+  // Define public routes that don't require login
+  const isPublicRoute = 
+    pathname.startsWith('/login') || 
+    pathname.startsWith('/signup') || 
+    pathname.startsWith('/verify-email');
 
-  // 1. If user is NOT logged in and tries to access a protected page -> Redirect to /login
-  if (!user && !isAuthRoute) {
+  // ONLY redirect unauthenticated users away from protected pages
+  if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
-    return NextResponse.redirect(url);
-  }
-
-  // 2. If user IS logged in and tries to access /login -> Redirect to /feed
-  if (user && pathname.startsWith('/login')) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/feed';
     return NextResponse.redirect(url);
   }
 
@@ -58,13 +53,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public assets (.png, .jpg, etc.)
-     */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
