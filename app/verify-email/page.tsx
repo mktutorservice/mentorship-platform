@@ -38,10 +38,9 @@ function VerifyEmailForm() {
       return;
     }
 
-    if (data?.session) {
-      router.refresh();
-      router.push('/feed');
-    }
+   if (data?.session || data?.user) {
+  window.location.href = '/feed';
+}
   };
 
   return (
