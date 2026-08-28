@@ -1,42 +1,40 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 
 export default function LoginPage() {
-  const router = useRouter();
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [step, setStep] = useState<'credentials' | 'otp'>('credentials');
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState<'student' | 'mentor' | 'parent'>('student');
   const [otpCode, setOtpCode] = useState('');
   
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Step 1: Handle initial Sign Up or Sign In submit
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setErrorMsg(null);
 
     if (mode === 'signup') {
-      // Send sign up request with OTP email setting
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: { role },
+        },
       });
 
       if (error) {
         setErrorMsg(error.message);
       } else {
-        // Switch view to OTP input screen
         setStep('otp');
       }
     } else {
-      // Standard email/password login
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -45,14 +43,13 @@ export default function LoginPage() {
       if (error) {
         setErrorMsg(error.message);
       } else {
-        router.push('/feed');
+        window.location.href = '/feed';
       }
     }
 
     setLoading(false);
   };
 
-  // Step 2: Verify the 6-digit OTP code sent to email
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -60,24 +57,27 @@ export default function LoginPage() {
 
     const { data, error } = await supabase.auth.verifyOtp({
       email,
-      token: otpCode,
+      token: otpCode.trim(),
       type: 'signup',
     });
 
     if (error) {
       setErrorMsg(error.message);
+      setLoading(false);
     } else if (data.session) {
-      router.push('/feed');
+      window.location.href = '/feed';
     }
+  };
 
-    setLoading(false);
+  const handleGuestLogin = () => {
+    localStorage.setItem('user_role', 'guest');
+    window.location.href = '/feed';
   };
 
   return (
     <section className="min-h-[85vh] flex items-center justify-center px-4">
       <div className="w-full max-w-sm bg-white p-8 rounded-3xl border border-gray-200/80 shadow-sm space-y-6">
         
-        {/* Step 1: Enter Credentials */}
         {step === 'credentials' ? (
           <>
             <div className="text-center space-y-4">
@@ -87,12 +87,11 @@ export default function LoginPage() {
                 </h1>
                 <p className="text-xs text-gray-500 mt-1">
                   {mode === 'signin'
-                    ? 'Sign in to access your mentorship dashboard'
-                    : 'Enter your details to receive a verification code'}
+                    ? 'Sign in to access your dashboard'
+                    : 'Select your role and enter details'}
                 </p>
               </div>
 
-              {/* Tab Switcher */}
               <div className="grid grid-cols-2 bg-gray-100 p-1 rounded-xl">
                 <button
                   type="button"
@@ -122,6 +121,23 @@ export default function LoginPage() {
             )}
 
             <form onSubmit={handleAuthSubmit} className="space-y-4">
+              {mode === 'signup' && (
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Select Your Role
+                  </label>
+                  <select
+                    value={role}
+                    onChange={(e) => setRole(e.target.value as any)}
+                    className="w-full text-sm p-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-gray-400 bg-gray-50/50"
+                  >
+                    <option value="student">Student</option>
+                    <option value="mentor">Mentor</option>
+                    <option value="parent">Parent</option>
+                  </select>
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
                   Email Address
@@ -159,9 +175,25 @@ export default function LoginPage() {
                 {loading ? 'Processing...' : mode === 'signin' ? 'Sign In' : 'Send Verification Code'}
               </button>
             </form>
+
+            <div className="relative flex items-center justify-center my-2">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200"></div>
+              </div>
+              <span className="relative bg-white px-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                OR
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleGuestLogin}
+              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium py-2.5 rounded-xl border border-gray-300/60 transition shadow-sm cursor-pointer"
+            >
+              Continue as Guest
+            </button>
           </>
         ) : (
-          /* Step 2: Enter Email Verification OTP Code */
           <div className="space-y-6">
             <div className="text-center">
               <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Verify Email</h1>
