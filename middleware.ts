@@ -3,7 +3,9 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
-    request: { headers: request.headers },
+    request: {
+      headers: request.headers,
+    },
   });
 
   const supabase = createServerClient(
@@ -18,7 +20,9 @@ export async function middleware(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
-          response = NextResponse.next({ request });
+          response = NextResponse.next({
+            request,
+          });
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options)
           );
@@ -27,21 +31,26 @@ export async function middleware(request: NextRequest) {
     }
   );
 
+  // Refresh auth token session
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Define public routes that unauthenticated users ARE allowed to visit
-  const isPublicRoute = 
-    request.nextUrl.pathname === '/login' || 
-    request.nextUrl.pathname.startsWith('/verify-em');
+  const { pathname } = request.nextUrl;
 
-  // If user is NOT logged in and trying to access a protected page, send to login
-  if (!user && !isPublicRoute) {
-    return NextResponse.redirect(new URL('/login', request.url));
+  // Define public auth routes
+  const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/verify-email');
+
+  // 1. If user is NOT logged in and tries to access a protected page -> Redirect to /login
+  if (!user && !isAuthRoute) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/login';
+    return NextResponse.redirect(url);
   }
 
-  // If user IS logged in and tries to visit /login, send them to /feed
-  if (user && request.nextUrl.pathname === '/login') {
-    return NextResponse.redirect(new URL('/feed', request.url));
+  // 2. If user IS logged in and tries to access /login -> Redirect to /feed
+  if (user && pathname.startsWith('/login')) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/feed';
+    return NextResponse.redirect(url);
   }
 
   return response;
@@ -50,11 +59,11 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for:
+     * Match all request paths except:
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - Public assets (.svg, .png, etc.)
+     * - public assets (.png, .jpg, etc.)
      */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
