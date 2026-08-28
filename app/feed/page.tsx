@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
-import BackgroundSelector from '@/app/components/BackgroungSelector';
+import BackgroundSelector from '@/components/BackgroundSelector';
 
 export default function HomePage() {
   const [role, setRole] = useState<string>('');
