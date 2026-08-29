@@ -11,9 +11,10 @@ interface AuthorProfile {
   profile_picture?: string;
 }
 
+// Updated union to include 'TEXT' and eliminate build-time type errors
 interface PostAttachment {
   url: string;
-  type: 'IMAGE' | 'VIDEO' | 'FILE';
+  type: 'IMAGE' | 'VIDEO' | 'FILE' | 'TEXT';
   name: string;
 }
 
@@ -194,7 +195,7 @@ export default function PostsPage() {
           .from('post-attachments')
           .getPublicUrl(fileName);
 
-        let fileType: 'IMAGE' | 'VIDEO' | 'FILE' = 'FILE';
+        let fileType: 'IMAGE' | 'VIDEO' | 'FILE' | 'TEXT' = 'FILE';
         if (file.type.startsWith('image/')) fileType = 'IMAGE';
         else if (file.type.startsWith('video/')) fileType = 'VIDEO';
 
@@ -214,13 +215,16 @@ export default function PostsPage() {
       ? JSON.stringify(uploadedAttachments) 
       : null;
 
+    const primaryType: 'TEXT' | 'IMAGE' | 'VIDEO' | 'FILE' = 
+      uploadedAttachments.length > 0 ? (uploadedAttachments[0].type as 'TEXT' | 'IMAGE' | 'VIDEO' | 'FILE') : 'TEXT';
+
     const { error } = await supabase
       .from('posts')
       .insert({
         author_id: user.id,
         content: finalContent,
         media_url: mediaPayload,
-        type: uploadedAttachments.length > 0 ? uploadedAttachments[0].type : 'TEXT',
+        type: primaryType,
         visibility: 'PUBLIC',
       });
 
