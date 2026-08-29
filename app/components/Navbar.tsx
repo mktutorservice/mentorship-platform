@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [mounted, setMounted] = useState<boolean>(false);
 
@@ -28,6 +29,13 @@ export default function Navbar() {
     };
   }, []);
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    localStorage.removeItem('user_role');
+    setIsAuthenticated(false);
+    router.push('/login');
+  };
+
   if (pathname === '/' || !mounted) {
     return null;
   }
@@ -47,15 +55,21 @@ export default function Navbar() {
           <Link href="/classrooms" className="hover:text-black transition">
             Classrooms
           </Link>
-          <Link href="/private-rooms" className="hover:text-black transition">
-            Private Rooms
-          </Link>
+          
+          {/* Restricted: Private Rooms only for authenticated users */}
+          {isAuthenticated && (
+            <Link href="/private-rooms" className="hover:text-black transition">
+              Private Rooms
+            </Link>
+          )}
+
           <Link href="/mentors" className="hover:text-black transition">
             Available Mentors
           </Link>
         </nav>
 
         <div className="flex items-center space-x-3">
+          {/* Restricted: Profile link only for authenticated users */}
           {isAuthenticated && (
             <Link
               href="/profile"
@@ -72,13 +86,21 @@ export default function Navbar() {
             Settings
           </Link>
 
-          {!isAuthenticated && (
+          {/* Toggle between Sign In (for guests) and Sign Out (for logged-in users) */}
+          {!isAuthenticated ? (
             <Link
               href="/login"
               className="bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium px-4 py-1.5 rounded-lg border border-gray-300/60 transition shadow-sm"
             >
-              Sign In
+              Log In
             </Link>
+          ) : (
+            <button
+              onClick={handleSignOut}
+              className="bg-red-50 hover:bg-red-100 text-red-600 text-sm font-medium px-4 py-1.5 rounded-lg border border-red-200 transition shadow-sm"
+            >
+              Sign Out
+            </button>
           )}
         </div>
 

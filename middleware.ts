@@ -31,18 +31,16 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Refresh auth session
   const { data: { user } } = await supabase.auth.getUser();
   const { pathname } = request.nextUrl;
 
-  // Define public routes that don't require login
-  const isPublicRoute = 
-    pathname.startsWith('/login') || 
-    pathname.startsWith('/signup') || 
-    pathname.startsWith('/verify-email');
+  // Protected routes strictly restricted from Guests
+  const isProtectedRoute = 
+    pathname.startsWith('/profile') || 
+    pathname.startsWith('/private-rooms');
 
-  // ONLY redirect unauthenticated users away from protected pages
-  if (!user && !isPublicRoute) {
+  // Redirect unauthenticated users away from restricted pages
+  if (!user && isProtectedRoute) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);
