@@ -2,154 +2,200 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { supabase } from '@/lib/supabaseClient';
-import BackgroundSelector from '../components/BackgroundSelector';
 
 export default function HomePage() {
-  const [role, setRole] = useState<string>('');
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [userName, setUserName] = useState<string>('User');
   const [mounted, setMounted] = useState<boolean>(false);
-  
-  // Dynamic Background State
-  const [bgImage, setBgImage] = useState<string>('/hero-bg.jpg');
-  const [isSelectorOpen, setIsSelectorOpen] = useState<boolean>(false);
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
   useEffect(() => {
     setMounted(true);
 
-    // Load saved background choice from localStorage
-    const savedBg = localStorage.getItem('user_bg_image');
-    if (savedBg) {
-      setBgImage(savedBg);
-    }
-
     async function checkAuth() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        setIsAuthenticated(true);
-        setRole(session.user.user_metadata?.role || 'Student');
-      } else {
-        setIsAuthenticated(false);
-        const guestRole = localStorage.getItem('user_role');
-        setRole(guestRole || 'Guest');
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('name')
+          .eq('id', session.user.id)
+          .maybeSingle();
+
+        if (profile?.name) setUserName(profile.name);
       }
     }
     checkAuth();
   }, []);
 
-  const handleSelectBackground = (newBgUrl: string) => {
-    setBgImage(newBgUrl);
-    localStorage.setItem('user_bg_image', newBgUrl);
-  };
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    localStorage.removeItem('user_role');
-    window.location.href = '/login';
-  };
-
   if (!mounted) return null;
 
   return (
-    <main 
-      className="min-h-screen bg-cover bg-center bg-fixed relative flex items-center justify-center p-4 transition-all duration-500"
-      style={{ backgroundImage: `url('${bgImage}')` }}
-    >
-      {/* Dark semi-transparent overlay */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+    <main className="relative min-h-screen bg-[#0f0f17] text-white selection:bg-[#B38728] selection:text-white overflow-hidden pb-16">
+      
+      {/* BACKGROUND LAYER */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src="/bg-tech.jpg"
+          alt="Dashboard Background"
+          fill
+          priority
+          className="object-cover object-center opacity-30 mix-blend-screen transition-all duration-700"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0f0f17]/80 via-[#0f0f17]/60 to-[#0f0f17]" />
+      </div>
 
-      <section className="relative z-10 w-full max-w-4xl mx-auto space-y-8 py-10">
-        
-        {/* Header Card */}
-        <div className="bg-[#494D5F]/90 backdrop-blur-md text-white rounded-3xl p-6 shadow-xl flex items-center justify-between border border-white/10">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-[#A0D2EB]">Home</h1>
-            <p className="text-xs text-[#E5EAF5] mt-1 capitalize">
-              Active Role: <span className="font-semibold text-white">{role}</span>
-            </p>
-          </div>
+      {/* FLOATING TRIGGER BUTTON - POSITIONED DIRECTLY UNDER NAVBAR */}
+      <button 
+        onClick={() => setIsMenuOpen(true)}
+        className="fixed top-20 left-6 z-40 w-10 h-10 rounded-full bg-[#B38728] hover:bg-[#966f1f] text-black transition-all shadow-xl active:scale-95 flex items-center justify-center border border-black/20"
+        aria-label="Open Navigation Menu"
+      >
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+        </svg>
+      </button>
 
-          {/* Action Controls */}
-          <div className="flex items-center space-x-3">
-            {/* Change Background Button */}
-            <button
-              onClick={() => setIsSelectorOpen(true)}
-              className="bg-[#353846] hover:bg-[#8458B3] text-white text-xs font-semibold px-4 py-2.5 rounded-full border border-white/10 transition shadow-sm cursor-pointer"
-            >
-              BACKGROUND
-            </button>
+      {/* DRAWER MENU OVERLAY */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-50 flex">
+          <div 
+            onClick={() => setIsMenuOpen(false)}
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
+          />
 
-            {isAuthenticated ? (
-              <>
-                <Link
-                  href="/profile"
-                  className="bg-[#8458B3] hover:bg-[#D0BDF4] text-white hover:text-[#494D5F] text-xs font-semibold px-5 py-2.5 rounded-full transition shadow-sm"
+          <aside className="relative w-80 max-w-[80vw] bg-[#171722] border-r border-white/10 p-6 flex flex-col justify-between z-10 shadow-2xl transition-transform duration-300">
+            <div>
+              <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
+                <span className="text-sm font-black uppercase tracking-widest text-white">
+                  Navigation<span className="text-[#B38728]">.</span>
+                </span>
+                <button 
+                  onClick={() => setIsMenuOpen(false)}
+                  className="text-gray-400 hover:text-white p-1"
                 >
-                  Profile
+                  ✕
+                </button>
+              </div>
+
+              <nav className="space-y-2">
+                <Link
+                  href="/"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#B38728]/10 text-[#B38728] font-bold text-sm"
+                >
+                  <span>🏠</span> Dashboard
                 </Link>
+
+                <Link
+                  href="/about"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 hover:text-white text-sm font-medium transition-colors"
+                >
+                  <span>ℹ️</span> About Us
+                </Link>
+
+                <Link
+                  href="/mentors"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 hover:text-white text-sm font-medium transition-colors"
+                >
+                  <span>👥</span> Mentors & Sessions
+                </Link>
+
+                <Link
+                  href="/posts"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 hover:text-white text-sm font-medium transition-colors"
+                >
+                  <span>💬</span> Community Feed
+                </Link>
+
                 <Link
                   href="/settings"
-                  className="bg-[#8458B3] hover:bg-[#D0BDF4] text-white hover:text-[#494D5F] text-xs font-semibold px-5 py-2.5 rounded-full transition shadow-sm"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 hover:text-white text-sm font-medium transition-colors"
                 >
-                  Settings
+                  <span>⚙️</span> Settings
                 </Link>
-                <button
-                  onClick={handleLogout}
-                  className="bg-red-600 hover:bg-red-500 text-white text-xs font-semibold px-5 py-2.5 rounded-full transition shadow-sm cursor-pointer"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <Link
-                href="/login"
-                className="bg-[#8458B3] hover:bg-[#D0BDF4] text-white hover:text-[#494D5F] text-xs font-semibold px-6 py-2.5 rounded-full transition shadow-sm"
-              >
-                Login
-              </Link>
-            )}
-          </div>
-        </div>
+              </nav>
+            </div>
 
-        {/* Main Navigation Pill Buttons */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="border-t border-white/10 pt-4 text-xs text-gray-500">
+              Logged in as <span className="text-white font-semibold">{userName}</span>
+            </div>
+          </aside>
+        </div>
+      )}
+
+      {/* MAIN CONTENT AREA */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 space-y-10">
+        
+        <section className="bg-[#171722]/80 border border-white/10 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl space-y-2">
+          <h1 className="text-2xl md:text-4xl font-black tracking-tight text-white">
+            Hello, <span className="text-[#B38728]">{userName}</span>
+          </h1>
+          <p className="text-xs md:text-sm text-gray-400 max-w-xl">
+            Explore available mentorship sessions, join live interactive classrooms, or review community feed updates.
+          </p>
+        </section>
+
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-[#171722]/60 border border-white/10 rounded-2xl p-4 backdrop-blur-md">
+            <span className="text-gray-400 text-xs font-medium uppercase tracking-wider">Active Mentors</span>
+            <p className="text-2xl font-black text-white mt-1">24+</p>
+          </div>
+          <div className="bg-[#171722]/60 border border-white/10 rounded-2xl p-4 backdrop-blur-md">
+            <span className="text-gray-400 text-xs font-medium uppercase tracking-wider">Live Classrooms</span>
+            <p className="text-2xl font-black text-white mt-1">12</p>
+          </div>
+          <div className="bg-[#171722]/60 border border-white/10 rounded-2xl p-4 backdrop-blur-md">
+            <span className="text-gray-400 text-xs font-medium uppercase tracking-wider">Community Posts</span>
+            <p className="text-2xl font-black text-white mt-1">140+</p>
+          </div>
+          <div className="bg-[#171722]/60 border border-white/10 rounded-2xl p-4 backdrop-blur-md">
+            <span className="text-gray-400 text-xs font-medium uppercase tracking-wider">Private Sessions</span>
+            <p className="text-2xl font-black text-white mt-1">8 Active</p>
+          </div>
+        </section>
+
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Link
             href="/posts"
-            className="flex items-center justify-center p-6 rounded-full bg-[#8458B3]/90 hover:bg-[#D0BDF4] text-white hover:text-[#494D5F] font-bold text-lg tracking-wide uppercase shadow-lg backdrop-blur-md transition-all duration-200 border border-white/20 transform hover:-translate-y-0.5"
+            className="group relative bg-[#171722]/80 border border-white/10 hover:border-[#B38728]/50 rounded-3xl p-8 backdrop-blur-xl shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden"
           >
-            Posts
+            <div className="relative z-10 space-y-4">
+              <h3 className="text-xl font-black text-white group-hover:text-[#B38728] transition-colors">
+                Community Posts & Feed
+              </h3>
+              <p className="text-xs text-gray-400 mt-1">
+                Share updates, participate in engineering discussions, and interact with fellow students and mentors.
+              </p>
+              <span className="inline-flex items-center gap-2 text-xs font-bold text-[#B38728]">
+                Explore Feed &rarr;
+              </span>
+            </div>
           </Link>
 
           <Link
             href="/mentors"
-            className="flex items-center justify-center p-6 rounded-full bg-[#8458B3]/90 hover:bg-[#D0BDF4] text-white hover:text-[#494D5F] font-bold text-lg tracking-wide uppercase shadow-lg backdrop-blur-md transition-all duration-200 border border-white/20 transform hover:-translate-y-0.5"
+            className="group relative bg-[#171722]/80 border border-white/10 hover:border-[#B38728]/50 rounded-3xl p-8 backdrop-blur-xl shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden"
           >
-            Available Mentors
+            <div className="relative z-10 space-y-4">
+              <h3 className="text-xl font-black text-white group-hover:text-[#B38728] transition-colors">
+                Available Mentors
+              </h3>
+              <p className="text-xs text-gray-400 mt-1">
+                Connect 1-on-1 with experienced mentors, book guidance sessions, and request project code reviews.
+              </p>
+              <span className="inline-flex items-center gap-2 text-xs font-bold text-[#B38728]">
+                Find a Mentor &rarr;
+              </span>
+            </div>
           </Link>
+        </section>
 
-          <Link
-            href="/classrooms"
-            className="flex items-center justify-center p-6 rounded-full bg-[#8458B3]/90 hover:bg-[#D0BDF4] text-white hover:text-[#494D5F] font-bold text-lg tracking-wide uppercase shadow-lg backdrop-blur-md transition-all duration-200 border border-white/20 transform hover:-translate-y-0.5"
-          >
-            Free Classrooms
-          </Link>
-
-          <Link
-            href="/private-rooms"
-            className="flex items-center justify-center p-6 rounded-full bg-[#8458B3]/90 hover:bg-[#D0BDF4] text-white hover:text-[#494D5F] font-bold text-lg tracking-wide uppercase shadow-lg backdrop-blur-md transition-all duration-200 border border-white/20 transform hover:-translate-y-0.5"
-          >
-            Private Classrooms
-          </Link>
-        </div>
-
-      </section>
-
-      {/* Background Selector Modal */}
-      <BackgroundSelector
-        isOpen={isSelectorOpen}
-        onClose={() => setIsSelectorOpen(false)}
-        onSelectBackground={handleSelectBackground}
-      />
+      </div>
     </main>
   );
 }

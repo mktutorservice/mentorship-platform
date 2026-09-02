@@ -1,5 +1,5 @@
 import './globals.css';
-import Navbar from './components/Navbar'; // Keep only one import!
+import Navbar from '@/components/Navbar';
 
 export const metadata = {
   title: 'Mentorship Platform',
