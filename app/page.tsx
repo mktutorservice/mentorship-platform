@@ -3,9 +3,9 @@ import Image from 'next/image';
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-[#0f0f17] text-white flex flex-col justify-between selection:bg-[#8458B3] selection:text-white">
+    <main className="min-h-screen bg-[#0f0f17] text-white flex flex-col justify-between selection:bg-[#B38728] selection:text-white">
       
-      {/* HEADER NAVBAR WITH GEOMETRIC LOGO & SMALL LOGIN BUTTON */}
+      {/* HEADER NAVBAR WITH GEOMETRIC LOGO & LOGIN BUTTON */}
       <header className="w-full max-w-7xl mx-auto flex items-center justify-between p-6 md:p-10 z-30">
         
         {/* GEOMETRIC LOGO: UNKNOWN MENTORSHIP */}
@@ -68,11 +68,11 @@ export default function LandingPage() {
             <path d="M430 22 V2 H442 A5 5 0 0 1 442 12 H430" stroke="white" strokeWidth="3.5" strokeLinecap="square" />
 
             {/* ACCENT PERIOD */}
-            <rect x="452" y="18" width="4" height="4" fill="#8458B3" />
+            <rect x="452" y="18" width="4" height="4" fill="#B38728" />
           </svg>
         </Link>
 
-        {/* SMALL LOGIN BUTTON */}
+        {/* LOGIN BUTTON */}
         <Link 
           href="/login" 
           className="relative inline-block hover:scale-105 transition-transform duration-300"
@@ -96,11 +96,15 @@ export default function LandingPage() {
           </span>
 
           <h1 className="text-4xl md:text-6xl font-black tracking-tight text-white leading-tight">
-            <span className="text-[#8458B3]">Entitlements</span> <br />
-            & Growth Strategy
+            <span className="font-thamrah gold-text text-5xl md:text-7xl block mb-2">
+              Entitlements
+            </span>
+            <span className="text-white">
+              & Growth Strategy
+            </span>
           </h1>
 
-          <p className="text-sm md:text-base text-gray-400 max-w-lg leading-relaxed">
+          <p className="font-tech gold-text text-xs md:text-sm max-w-lg leading-relaxed uppercase tracking-wider">
             Accelerate your engineering workflow through direct peer collaboration, structured 
             learning frameworks, and personalized technical mentorship tailored to your targets.
           </p>
@@ -108,9 +112,9 @@ export default function LandingPage() {
           <div className="pt-2">
             <Link
               href="/login"
-              className="inline-block bg-[#8458B3] hover:bg-[#7347a2] text-white font-bold text-xs uppercase tracking-wider px-8 py-3.5 rounded-lg shadow-xl hover:shadow-[#8458B3]/30 transition duration-300"
+              className="gold-bg font-tech inline-block font-bold text-xs uppercase tracking-wider px-8 py-3.5 rounded-lg shadow-xl hover:scale-105 transition duration-300"
             >
-              How Can We Help
+              START UR JOURNEY WITH US
             </Link>
           </div>
         </div>
@@ -145,10 +149,10 @@ export default function LandingPage() {
             </span>
 
             <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white">
-              About <span className="text-emerald-400">Us</span>
+              About <span className="gold-text font-thamrah">Us</span>
             </h2>
 
-            <p className="text-xs md:text-sm text-gray-400 leading-relaxed max-w-xl">
+            <p className="font-tech text-xs md:text-sm text-gray-300 leading-relaxed max-w-xl tracking-wide">
               We connect aspiring developers and engineers with industry-vetted mentors to bridge the gap 
               between academic theory and hands-on production code. Engage in live classrooms, request 
               detailed code architecture reviews, and build real-world software together.
@@ -157,7 +161,7 @@ export default function LandingPage() {
             <div className="pt-4">
               <Link
                 href="/login"
-                className="inline-block bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-extrabold text-xs uppercase tracking-wider px-8 py-3.5 rounded-lg shadow-lg hover:shadow-emerald-500/20 transition duration-300"
+                className="gold-bg font-tech inline-block font-bold text-xs uppercase tracking-wider px-8 py-3.5 rounded-lg shadow-xl hover:scale-105 transition duration-300"
               >
                 View More
               </Link>
@@ -169,11 +173,11 @@ export default function LandingPage() {
       {/* SECTION 3: 3-CARD CLASSROOMS GRID */}
       <section className="w-full max-w-7xl mx-auto px-6 py-20 space-y-12">
         <div className="text-center space-y-3">
-          <span className="text-xs uppercase tracking-[0.3em] text-[#8458B3] font-semibold">
+          <span className="text-xs uppercase tracking-[0.3em] gold-text font-tech font-semibold">
             LEVERAGE YOUR FUTURE
           </span>
           <h2 className="text-4xl md:text-6xl font-serif tracking-tight text-white">
-            Explore Active <span className="italic font-normal text-[#D0BDF4]">Classrooms</span>
+            Explore Active <span className="italic font-normal gold-text">Classrooms</span>
           </h2>
           <p className="text-xs md:text-sm text-gray-400 max-w-lg mx-auto font-light leading-relaxed">
             Choose a path to level up your technical domain with guided sessions, 1-on-1 feedback, and peer collaboration.
@@ -183,7 +187,7 @@ export default function LandingPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-4">
           
           {/* Card 1 */}
-          <div className="bg-[#171722] border border-white/10 rounded-2xl p-6 flex flex-col justify-between space-y-6 hover:border-[#8458B3]/60 transition duration-300 group shadow-2xl">
+          <div className="bg-[#171722] border border-white/10 rounded-2xl p-6 flex flex-col justify-between space-y-6 hover:border-[#B38728]/60 transition duration-300 group shadow-2xl">
             <div className="relative w-full h-52 rounded-xl overflow-hidden bg-gray-900">
               <Image
                 src="/card1.jpg"
@@ -195,7 +199,7 @@ export default function LandingPage() {
 
             <div className="space-y-3 flex-1 flex flex-col justify-between">
               <div>
-                <span className="text-[10px] uppercase tracking-[0.25em] text-emerald-400 font-bold">
+                <span className="text-[10px] uppercase tracking-[0.25em] gold-text font-tech font-bold">
                   WORKSHOP
                 </span>
                 <h3 className="text-2xl font-serif text-white mt-1">
@@ -209,10 +213,10 @@ export default function LandingPage() {
               <div className="pt-4 border-t border-white/5">
                 <Link
                   href="/login"
-                  className="inline-flex items-center gap-3 text-xs font-semibold text-white group-hover:text-[#D0BDF4] transition"
+                  className="inline-flex items-center gap-3 text-xs font-semibold text-white group-hover:text-[#FCF6BA] transition"
                 >
-                  <span>Explore Hub</span>
-                  <span className="w-7 h-7 rounded-full border border-white/20 flex items-center justify-center group-hover:border-[#D0BDF4] group-hover:translate-x-1 transition duration-300">
+                  <span className="font-tech">Explore Hub</span>
+                  <span className="w-7 h-7 rounded-full border border-white/20 flex items-center justify-center group-hover:border-[#FCF6BA] group-hover:translate-x-1 transition duration-300">
                     →
                   </span>
                 </Link>
@@ -221,7 +225,7 @@ export default function LandingPage() {
           </div>
 
           {/* Card 2 */}
-          <div className="bg-[#171722] border border-white/10 rounded-2xl p-6 flex flex-col justify-between space-y-6 hover:border-[#8458B3]/60 transition duration-300 group shadow-2xl">
+          <div className="bg-[#171722] border border-white/10 rounded-2xl p-6 flex flex-col justify-between space-y-6 hover:border-[#B38728]/60 transition duration-300 group shadow-2xl">
             <div className="relative w-full h-52 rounded-xl overflow-hidden bg-gray-900">
               <Image
                 src="/card2.jpg"
@@ -233,7 +237,7 @@ export default function LandingPage() {
 
             <div className="space-y-3 flex-1 flex flex-col justify-between">
               <div>
-                <span className="text-[10px] uppercase tracking-[0.25em] text-[#D0BDF4] font-bold">
+                <span className="text-[10px] uppercase tracking-[0.25em] gold-text font-tech font-bold">
                   1-ON-1 GUIDANCE
                 </span>
                 <h3 className="text-2xl font-serif text-white mt-1">
@@ -247,10 +251,10 @@ export default function LandingPage() {
               <div className="pt-4 border-t border-white/5">
                 <Link
                   href="/login"
-                  className="inline-flex items-center gap-3 text-xs font-semibold text-white group-hover:text-[#D0BDF4] transition"
+                  className="inline-flex items-center gap-3 text-xs font-semibold text-white group-hover:text-[#FCF6BA] transition"
                 >
-                  <span>Book Session</span>
-                  <span className="w-7 h-7 rounded-full border border-white/20 flex items-center justify-center group-hover:border-[#D0BDF4] group-hover:translate-x-1 transition duration-300">
+                  <span className="font-tech">Book Session</span>
+                  <span className="w-7 h-7 rounded-full border border-white/20 flex items-center justify-center group-hover:border-[#FCF6BA] group-hover:translate-x-1 transition duration-300">
                     →
                   </span>
                 </Link>
@@ -259,7 +263,7 @@ export default function LandingPage() {
           </div>
 
           {/* Card 3 */}
-          <div className="bg-[#171722] border border-white/10 rounded-2xl p-6 flex flex-col justify-between space-y-6 hover:border-[#8458B3]/60 transition duration-300 group shadow-2xl">
+          <div className="bg-[#171722] border border-white/10 rounded-2xl p-6 flex flex-col justify-between space-y-6 hover:border-[#B38728]/60 transition duration-300 group shadow-2xl">
             <div className="relative w-full h-52 rounded-xl overflow-hidden bg-gray-900">
               <Image
                 src="/card3.jpg"
@@ -271,7 +275,7 @@ export default function LandingPage() {
 
             <div className="space-y-3 flex-1 flex flex-col justify-between">
               <div>
-                <span className="text-[10px] uppercase tracking-[0.25em] text-[#8458B3] font-bold">
+                <span className="text-[10px] uppercase tracking-[0.25em] gold-text font-tech font-bold">
                   COMMUNITY
                 </span>
                 <h3 className="text-2xl font-serif text-white mt-1">
@@ -285,10 +289,10 @@ export default function LandingPage() {
               <div className="pt-4 border-t border-white/5">
                 <Link
                   href="/login"
-                  className="inline-flex items-center gap-3 text-xs font-semibold text-white group-hover:text-[#D0BDF4] transition"
+                  className="inline-flex items-center gap-3 text-xs font-semibold text-white group-hover:text-[#FCF6BA] transition"
                 >
-                  <span>Join Community</span>
-                  <span className="w-7 h-7 rounded-full border border-white/20 flex items-center justify-center group-hover:border-[#D0BDF4] group-hover:translate-x-1 transition duration-300">
+                  <span className="font-tech">Join Community</span>
+                  <span className="w-7 h-7 rounded-full border border-white/20 flex items-center justify-center group-hover:border-[#FCF6BA] group-hover:translate-x-1 transition duration-300">
                     →
                   </span>
                 </Link>
