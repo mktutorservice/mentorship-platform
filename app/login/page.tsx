@@ -74,8 +74,6 @@ export default function LoginPage() {
     setGoogleLoading(true);
     setErrorMsg(null);
 
-    // For signup, we pass the selected role along as metadata so it's
-    // available once Supabase creates the user record.
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -92,7 +90,6 @@ export default function LoginPage() {
       setErrorMsg(error.message);
       setGoogleLoading(false);
     }
-    // On success, Supabase redirects to Google, so no further action needed here.
   };
 
   const handleGuestLogin = () => {
@@ -101,29 +98,31 @@ export default function LoginPage() {
   };
 
   return (
-    <section className="min-h-[85vh] flex items-center justify-center px-4">
-      <div className="w-full max-w-sm bg-white p-8 rounded-3xl border border-gray-200/80 shadow-sm space-y-6">
+    <main className="min-h-screen bg-[#12121e] flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-[#1b1b26] border border-white/10 rounded-3xl p-8 shadow-2xl space-y-6">
         
         {step === 'credentials' ? (
           <>
             <div className="text-center space-y-4">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+                <h1 className="text-2xl font-bold text-[#D0BDF4] tracking-tight">
                   {mode === 'signin' ? 'Welcome Back' : 'Create Account'}
                 </h1>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-400 mt-1">
                   {mode === 'signin'
-                    ? 'Sign in to access your dashboard'
-                    : 'Select your role and enter details'}
+                    ? 'Sign in to access your mentorship dashboard'
+                    : 'Select your role and register details'}
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 bg-gray-100 p-1 rounded-xl">
+              <div className="grid grid-cols-2 bg-[#12121e] p-1 rounded-2xl border border-white/5">
                 <button
                   type="button"
                   onClick={() => { setMode('signin'); setErrorMsg(null); }}
-                  className={`text-xs font-semibold py-1.5 rounded-lg transition ${
-                    mode === 'signin' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'
+                  className={`text-xs font-semibold py-2 rounded-xl transition ${
+                    mode === 'signin'
+                      ? 'bg-[#8458B3] text-white shadow-sm'
+                      : 'text-gray-400 hover:text-white'
                   }`}
                 >
                   Sign In
@@ -131,8 +130,10 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => { setMode('signup'); setErrorMsg(null); }}
-                  className={`text-xs font-semibold py-1.5 rounded-lg transition ${
-                    mode === 'signup' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'
+                  className={`text-xs font-semibold py-2 rounded-xl transition ${
+                    mode === 'signup'
+                      ? 'bg-[#8458B3] text-white shadow-sm'
+                      : 'text-gray-400 hover:text-white'
                   }`}
                 >
                   Sign Up
@@ -141,20 +142,20 @@ export default function LoginPage() {
             </div>
 
             {errorMsg && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 font-medium">
+              <div className="p-3 bg-red-500/20 border border-red-500/40 rounded-2xl text-xs text-red-200 text-center font-medium">
                 {errorMsg}
               </div>
             )}
 
             {mode === 'signup' && (
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                <label className="block text-xs font-semibold text-gray-300 mb-1">
                   Select Your Role
                 </label>
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value as any)}
-                  className="w-full text-sm p-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-gray-400 bg-gray-50/50"
+                  className="w-full text-xs p-3 rounded-2xl border border-white/10 focus:outline-none focus:border-[#8458B3] bg-[#12121e] text-white"
                 >
                   <option value="student">Student</option>
                   <option value="mentor">Mentor</option>
@@ -167,7 +168,7 @@ export default function LoginPage() {
               type="button"
               onClick={handleGoogleAuth}
               disabled={googleLoading}
-              className="w-full flex items-center justify-center gap-2 bg-white hover:bg-gray-50 disabled:opacity-50 text-gray-700 text-sm font-medium py-2.5 rounded-xl border border-gray-300/80 transition shadow-sm cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 bg-[#12121e] hover:bg-black/40 disabled:opacity-50 text-white text-xs font-medium py-3 rounded-2xl border border-white/10 transition shadow-sm cursor-pointer"
             >
               <svg width="16" height="16" viewBox="0 0 48 48" aria-hidden="true">
                 <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>
@@ -184,16 +185,16 @@ export default function LoginPage() {
 
             <div className="relative flex items-center justify-center my-2">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200"></div>
+                <div className="w-full border-t border-white/10"></div>
               </div>
-              <span className="relative bg-white px-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+              <span className="relative bg-[#1b1b26] px-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
                 OR
               </span>
             </div>
 
             <form onSubmit={handleAuthSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                <label className="block text-xs font-semibold text-gray-300 mb-1">
                   Email Address
                 </label>
                 <input
@@ -202,12 +203,12 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full text-sm p-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-gray-400 bg-gray-50/50"
+                  className="w-full text-xs p-3 rounded-2xl border border-white/10 focus:outline-none focus:border-[#8458B3] bg-[#12121e] text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                <label className="block text-xs font-semibold text-gray-300 mb-1">
                   Password
                 </label>
                 <input
@@ -217,14 +218,14 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full text-sm p-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-gray-400 bg-gray-50/50"
+                  className="w-full text-xs p-3 rounded-2xl border border-white/10 focus:outline-none focus:border-[#8458B3] bg-[#12121e] text-white"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gray-900 hover:bg-gray-800 disabled:opacity-50 text-white text-sm font-medium py-2.5 rounded-xl transition shadow-sm cursor-pointer"
+                className="w-full bg-[#8458B3] hover:bg-[#a280d3] disabled:opacity-50 text-white text-xs font-bold py-3 rounded-2xl transition shadow-lg cursor-pointer"
               >
                 {loading ? 'Processing...' : mode === 'signin' ? 'Sign In' : 'Send Verification Code'}
               </button>
@@ -233,7 +234,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={handleGuestLogin}
-              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium py-2.5 rounded-xl border border-gray-300/60 transition shadow-sm cursor-pointer"
+              className="w-full bg-[#12121e] hover:bg-black/40 text-gray-300 text-xs font-semibold py-3 rounded-2xl border border-white/10 transition shadow-sm cursor-pointer"
             >
               Continue as Guest
             </button>
@@ -241,21 +242,21 @@ export default function LoginPage() {
         ) : (
           <div className="space-y-6">
             <div className="text-center">
-              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Verify Email</h1>
-              <p className="text-xs text-gray-500 mt-1">
-                We sent a code to <span className="font-semibold text-gray-800">{email}</span>
+              <h1 className="text-2xl font-bold text-[#D0BDF4] tracking-tight">Verify Email</h1>
+              <p className="text-xs text-gray-400 mt-1">
+                We sent a code to <span className="font-semibold text-white">{email}</span>
               </p>
             </div>
 
             {errorMsg && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 font-medium">
+              <div className="p-3 bg-red-500/20 border border-red-500/40 rounded-2xl text-xs text-red-200 text-center font-medium">
                 {errorMsg}
               </div>
             )}
 
             <form onSubmit={handleVerifyOtp} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                <label className="block text-xs font-semibold text-gray-300 mb-1">
                   Enter 6-Digit Code
                 </label>
                 <input
@@ -265,14 +266,14 @@ export default function LoginPage() {
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value)}
                   placeholder="123456"
-                  className="w-full text-center tracking-widest text-lg font-mono p-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-gray-400 bg-gray-50/50"
+                  className="w-full text-center tracking-widest text-lg font-mono p-3 rounded-2xl border border-white/10 focus:outline-none focus:border-[#8458B3] bg-[#12121e] text-white"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gray-900 hover:bg-gray-800 disabled:opacity-50 text-white text-sm font-medium py-2.5 rounded-xl transition shadow-sm cursor-pointer"
+                className="w-full bg-[#8458B3] hover:bg-[#a280d3] disabled:opacity-50 text-white text-xs font-bold py-3 rounded-2xl transition shadow-lg cursor-pointer"
               >
                 {loading ? 'Verifying...' : 'Verify Code & Sign In'}
               </button>
@@ -281,7 +282,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setStep('credentials')}
-              className="w-full text-xs text-gray-500 hover:text-gray-900 font-medium text-center"
+              className="w-full text-xs text-gray-400 hover:text-white font-medium text-center"
             >
               ← Back to registration
             </button>
@@ -289,6 +290,6 @@ export default function LoginPage() {
         )}
 
       </div>
-    </section>
+    </main>
   );
 }

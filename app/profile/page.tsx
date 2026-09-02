@@ -7,9 +7,10 @@ import { supabase } from '@/lib/supabaseClient';
 export default function ProfilePage() {
   const [mounted, setMounted] = useState<boolean>(false);
   const [bgImage, setBgImage] = useState<string>('/hero-bg.jpg');
+  const [userId, setUserId] = useState<string | null>(null);
 
   // User Profile State
-  const [role, setRole] = useState<string>('Student');
+  const [role, setRole] = useState<string>('STUDENT');
   const [userName, setUserName] = useState<string>('Alex Johnson');
   const [userStatus, setUserStatus] = useState<string>('Available for tutoring sessions');
   const [feeStatus, setFeeStatus] = useState<string>('Per Hour');
@@ -19,9 +20,9 @@ export default function ProfilePage() {
   const [isVerified, setIsVerified] = useState<boolean>(false);
 
   // Contact Info State
-  const [phone, setPhone] = useState<string>('+1 (555) 019-2834');
-  const [email, setEmail] = useState<string>('alex.johnson@example.com');
-  const [telegram, setTelegram] = useState<string>('@alex_tutor');
+  const [phone, setPhone] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [telegram, setTelegram] = useState<string>('');
 
   // UI Controls
   const [showSettings, setShowSettings] = useState<boolean>(false);
@@ -29,6 +30,7 @@ export default function ProfilePage() {
   const [showFullPP, setShowFullPP] = useState<boolean>(false);
   const [showPostModal, setShowPostModal] = useState<boolean>(false);
   const [postContent, setPostContent] = useState<string>('');
+  const [saving, setSaving] = useState<boolean>(false);
 
   useEffect(() => {
     setMounted(true);
@@ -36,82 +38,97 @@ export default function ProfilePage() {
     const savedBg = localStorage.getItem('user_bg_image');
     if (savedBg) setBgImage(savedBg);
 
-    // Load saved profile edits from localStorage
-    const savedProfile = localStorage.getItem('user_profile_data');
-    if (savedProfile) {
-      try {
-        const parsed = JSON.parse(savedProfile);
-        if (parsed.userName) setUserName(parsed.userName);
-        if (parsed.userStatus) setUserStatus(parsed.userStatus);
-        if (parsed.feeStatus) setFeeStatus(parsed.feeStatus);
-        if (parsed.gender) setGender(parsed.gender);
-        if (parsed.privacy) setPrivacy(parsed.privacy);
-        if (parsed.avatarUrl) setAvatarUrl(parsed.avatarUrl);
-        if (parsed.phone) setPhone(parsed.phone);
-        if (parsed.email) setEmail(parsed.email);
-        if (parsed.telegram) setTelegram(parsed.telegram);
-        if (parsed.role) setRole(parsed.role);
-      } catch (e) {
-        console.error('Error parsing saved profile data:', e);
+    async function loadUserProfile() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+
+      const currentUid = session.user.id;
+      setUserId(currentUid);
+      setEmail(session.user.email || '');
+
+      // Fetch row directly from profiles table
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', currentUid)
+        .maybeSingle();
+
+      if (profile) {
+        if (profile.name) setUserName(profile.name);
+        if (profile.role) setRole(profile.role);
+        if (profile.activity_status) setUserStatus(profile.activity_status);
+        if (profile.fee_status) setFeeStatus(profile.fee_status);
+        if (profile.gender) setGender(profile.gender);
+        if (profile.profile_picture) setAvatarUrl(profile.profile_picture);
+        if (profile.phone) setPhone(profile.phone);
+        if (profile.is_verified) setIsVerified(profile.is_verified);
       }
-    } else {
-      async function loadSupabaseAuth() {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          const metadata = session.user.user_metadata || {};
-          if (metadata.role) setRole(metadata.role);
-          if (metadata.full_name) setUserName(metadata.full_name);
-          if (metadata.avatar_url) setAvatarUrl(metadata.avatar_url);
-          if (session.user.email) setEmail(session.user.email);
-        } else {
-          const localRole = localStorage.getItem('user_role');
-          if (localRole) setRole(localRole);
-        }
-      }
-      loadSupabaseAuth();
     }
+
+    loadUserProfile();
   }, []);
 
-  // Convert uploaded image to Base64 so it persists in storage
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        const base64String = reader.result as string;
-        setAvatarUrl(base64String);
+        setAvatarUrl(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  // Explicit Save Handler
-  const handleSaveSettings = (e: React.FormEvent) => {
+  // Syncs to Supabase profiles table
+  const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
-    const updatedProfile = {
-      userName,
-      userStatus,
-      feeStatus,
-      gender,
-      privacy,
-      avatarUrl,
-      phone,
-      email,
-      telegram,
-      role
+    if (!userId) return;
+
+    setSaving(true);
+
+    const payload = {
+      name: userName,
+      activity_status: userStatus,
+      fee_status: feeStatus,
+      gender: gender,
+      profile_picture: avatarUrl,
+      phone: phone,
+      updated_at: new Date().toISOString(),
     };
-    
-    localStorage.setItem('user_profile_data', JSON.stringify(updatedProfile));
-    setShowSettings(false);
-    alert('Profile changes saved successfully and persisted!');
+
+    const { error } = await supabase
+      .from('profiles')
+      .update(payload)
+      .eq('id', userId);
+
+    setSaving(false);
+
+    if (error) {
+      alert(`Error updating profile: ${error.message}`);
+    } else {
+      setShowSettings(false);
+      alert('Profile updated successfully in Supabase!');
+    }
   };
 
-  const handleCreatePost = (e: React.FormEvent) => {
+  const handleCreatePost = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!postContent.trim()) return;
-    alert(`Post published by ${userName}!`);
-    setPostContent('');
-    setShowPostModal(false);
+    if (!postContent.trim() || !userId) return;
+
+    const { error } = await supabase.from('posts').insert({
+      author_id: userId,
+      content: postContent.trim(),
+      type: 'TEXT',
+      visibility: 'PUBLIC'
+    });
+
+    if (error) {
+      alert(`Failed to publish post: ${error.message}`);
+    } else {
+      alert('Post published to feed!');
+      setPostContent('');
+      setShowPostModal(false);
+    }
   };
 
   if (!mounted) return null;
@@ -247,18 +264,6 @@ export default function ProfilePage() {
               </div>
 
               <div>
-                <label className="block mb-1 text-[#E5EAF5] font-semibold">Privacy</label>
-                <select
-                  value={privacy}
-                  onChange={(e) => setPrivacy(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-full bg-[#353846] border border-white/10 text-white focus:outline-none focus:border-[#D0BDF4]"
-                >
-                  <option value="Public">Public Profile</option>
-                  <option value="Private">Private Profile</option>
-                </select>
-              </div>
-
-              <div>
                 <label className="block mb-1 text-[#E5EAF5] font-semibold">Upload Profile Picture</label>
                 <input 
                   type="file"
@@ -278,22 +283,13 @@ export default function ProfilePage() {
                 />
               </div>
 
-              <div>
-                <label className="block mb-1 text-[#E5EAF5] font-semibold">Telegram Username</label>
-                <input 
-                  type="text"
-                  value={telegram}
-                  onChange={(e) => setTelegram(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-full bg-[#353846] border border-white/10 text-white focus:outline-none focus:border-[#D0BDF4]"
-                />
-              </div>
-
               <div className="md:col-span-2 pt-2 flex justify-end">
                 <button
                   type="submit"
-                  className="bg-[#8458B3] hover:bg-[#D0BDF4] text-white hover:text-[#494D5F] font-bold px-6 py-2.5 rounded-full transition shadow-md cursor-pointer"
+                  disabled={saving}
+                  className="bg-[#8458B3] hover:bg-[#D0BDF4] text-white hover:text-[#494D5F] font-bold px-6 py-2.5 rounded-full transition shadow-md cursor-pointer disabled:opacity-50"
                 >
-                  Save Profile Changes
+                  {saving ? 'Saving...' : 'Save Profile Changes'}
                 </button>
               </div>
             </form>
@@ -301,39 +297,35 @@ export default function ProfilePage() {
         )}
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
           <Link
             href="/classrooms"
             className="flex items-center justify-center p-3.5 rounded-full bg-[#8458B3]/90 hover:bg-[#D0BDF4] text-white hover:text-[#494D5F] font-bold text-xs uppercase shadow-lg backdrop-blur-md transition-all border border-white/20 text-center"
           >
-            Give Free Tutor
+            Classrooms
           </Link>
 
           <Link
             href="/private-rooms"
             className="flex items-center justify-center p-3.5 rounded-full bg-[#8458B3]/90 hover:bg-[#D0BDF4] text-white hover:text-[#494D5F] font-bold text-xs uppercase shadow-lg backdrop-blur-md transition-all border border-white/20 text-center"
           >
-            Give Private Tutor
+            Private Hub
           </Link>
-
-          <button
-            onClick={() => alert(`Connection request sent for ${userName}!`)}
-            className="flex items-center justify-center p-3.5 rounded-full bg-[#8458B3]/90 hover:bg-[#D0BDF4] text-white hover:text-[#494D5F] font-bold text-xs uppercase shadow-lg backdrop-blur-md transition-all border border-white/20 text-center cursor-pointer"
-          >
-            Connect
-          </button>
 
           <button
             onClick={() => setShowContactsModal(true)}
             className="flex items-center justify-center p-3.5 rounded-full bg-[#8458B3]/90 hover:bg-[#D0BDF4] text-white hover:text-[#494D5F] font-bold text-xs uppercase shadow-lg backdrop-blur-md transition-all border border-white/20 text-center cursor-pointer"
           >
-             My Contacts
+            My Contacts
           </button>
 
           <button
-            onClick={() => {
-              setIsVerified(true);
-              alert('Account Verification request submitted!');
+            onClick={async () => {
+              if (userId) {
+                await supabase.from('profiles').update({ is_verified: true }).eq('id', userId);
+                setIsVerified(true);
+                alert('Account status updated to Verified!');
+              }
             }}
             className="flex items-center justify-center p-3.5 rounded-full bg-[#8458B3]/90 hover:bg-[#D0BDF4] text-white hover:text-[#494D5F] font-bold text-xs uppercase shadow-lg backdrop-blur-md transition-all border border-white/20 text-center cursor-pointer"
           >
@@ -342,28 +334,6 @@ export default function ProfilePage() {
         </div>
 
       </section>
-
-      {/* Full Photo Modal */}
-      {showFullPP && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 cursor-pointer"
-          onClick={() => setShowFullPP(false)}
-        >
-          <div className="relative max-w-xl max-h-[85vh]">
-            <img 
-              src={avatarUrl} 
-              alt={userName} 
-              className="max-w-full max-h-[80vh] rounded-3xl object-contain border-2 border-white/20 shadow-2xl"
-            />
-            <button 
-              onClick={() => setShowFullPP(false)}
-              className="absolute top-4 right-4 text-white bg-black/60 rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg hover:bg-red-600 transition"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Contacts Modal */}
       {showContactsModal && (
@@ -382,17 +352,12 @@ export default function ProfilePage() {
             <div className="space-y-3 text-sm">
               <div className="bg-[#353846] p-3 rounded-2xl border border-white/5">
                 <p className="text-xs text-[#A0D2EB] font-semibold">Email</p>
-                <p className="text-white font-medium">{email}</p>
+                <p className="text-white font-medium">{email || 'Not provided'}</p>
               </div>
 
               <div className="bg-[#353846] p-3 rounded-2xl border border-white/5">
                 <p className="text-xs text-[#A0D2EB] font-semibold">Phone</p>
-                <p className="text-white font-medium">{phone}</p>
-              </div>
-
-              <div className="bg-[#353846] p-3 rounded-2xl border border-white/5">
-                <p className="text-xs text-[#A0D2EB] font-semibold">Telegram</p>
-                <p className="text-white font-medium">{telegram}</p>
+                <p className="text-white font-medium">{phone || 'Not set'}</p>
               </div>
             </div>
 
@@ -423,7 +388,7 @@ export default function ProfilePage() {
             <form onSubmit={handleCreatePost} className="space-y-4">
               <textarea
                 rows={4}
-                placeholder="Share your tutoring updates or announcements..."
+                placeholder="Share updates with your peers or mentors..."
                 value={postContent}
                 onChange={(e) => setPostContent(e.target.value)}
                 className="w-full p-4 rounded-2xl bg-[#353846] text-white border border-white/10 focus:outline-none focus:border-[#D0BDF4] text-xs resize-none"

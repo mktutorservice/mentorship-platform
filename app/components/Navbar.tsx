@@ -9,16 +9,31 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [userName, setUserName] = useState<string>('Guest');
   const [mounted, setMounted] = useState<boolean>(false);
 
   useEffect(() => {
     setMounted(true);
 
-    async function checkAuth() {
+    async function checkAuthAndProfile() {
       const { data: { session } } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session?.user);
+      const user = session?.user;
+      setIsAuthenticated(!!user);
+
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('name')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (profile?.name) {
+          setUserName(profile.name);
+        }
+      }
     }
-    checkAuth();
+
+    checkAuthAndProfile();
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthenticated(!!session?.user);
@@ -33,6 +48,7 @@ export default function Navbar() {
     await supabase.auth.signOut();
     localStorage.removeItem('user_role');
     setIsAuthenticated(false);
+    setUserName('Guest');
     router.push('/login');
   };
 
@@ -41,70 +57,62 @@ export default function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/80 px-4 py-3 shadow-sm">
-      <div className="max-w-6xl mx-auto flex items-center justify-between">
-        
-        <Link href="/feed" className="text-xl font-bold tracking-tight text-gray-900">
-          MentorshipPlatform
+    <nav className="sticky top-0 z-40 w-full bg-[#494D5F]/90 backdrop-blur-md border-b border-white/10 text-white py-3 px-6 shadow-md flex items-center justify-between">
+      <Link href="/feed" className="text-lg font-bold text-[#A0D2EB] hover:opacity-80 transition">
+        MentorshipPlatform
+      </Link>
+
+      <div className="hidden md:flex items-center space-x-6 text-xs font-semibold">
+        <Link href="/feed" className="hover:text-[#D0BDF4] transition">
+          Home
         </Link>
-
-        <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-600">
-          <Link href="/feed" className="hover:text-black transition">
-            Home
+        <Link href="/classrooms" className="hover:text-[#D0BDF4] transition">
+          Classrooms
+        </Link>
+        
+        {isAuthenticated && (
+          <Link href="/private-rooms" className="hover:text-[#D0BDF4] transition">
+            Private Rooms
           </Link>
-          <Link href="/classrooms" className="hover:text-black transition">
-            Classrooms
-          </Link>
-          
-          {/* Restricted: Private Rooms only for authenticated users */}
-          {isAuthenticated && (
-            <Link href="/private-rooms" className="hover:text-black transition">
-              Private Rooms
-            </Link>
-          )}
+        )}
 
-          <Link href="/mentors" className="hover:text-black transition">
-            Available Mentors
-          </Link>
-        </nav>
-
-        <div className="flex items-center space-x-3">
-          {/* Restricted: Profile link only for authenticated users */}
-          {isAuthenticated && (
-            <Link
-              href="/profile"
-              className="text-sm font-medium text-gray-600 hover:text-black transition"
-            >
-              Profile
-            </Link>
-          )}
-
-          <Link
-            href="/settings"
-            className="text-sm font-medium text-gray-600 hover:text-black transition px-3 py-1.5 rounded-lg hover:bg-gray-100"
-          >
-            Settings
-          </Link>
-
-          {/* Toggle between Sign In (for guests) and Sign Out (for logged-in users) */}
-          {!isAuthenticated ? (
-            <Link
-              href="/login"
-              className="bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium px-4 py-1.5 rounded-lg border border-gray-300/60 transition shadow-sm"
-            >
-              Log In
-            </Link>
-          ) : (
-            <button
-              onClick={handleSignOut}
-              className="bg-red-50 hover:bg-red-100 text-red-600 text-sm font-medium px-4 py-1.5 rounded-lg border border-red-200 transition shadow-sm"
-            >
-              Sign Out
-            </button>
-          )}
-        </div>
-
+        <Link href="/mentors" className="hover:text-[#D0BDF4] transition">
+          Available Mentors
+        </Link>
       </div>
-    </header>
+
+      <div className="flex items-center space-x-3 text-xs">
+        {isAuthenticated && (
+          <span className="text-[#E5EAF5] font-medium hidden sm:inline">
+            {userName}
+          </span>
+        )}
+
+        {isAuthenticated && (
+          <Link
+            href="/profile"
+            className="text-xs font-semibold bg-[#8458B3] hover:bg-[#D0BDF4] hover:text-[#494D5F] px-3 py-1.5 rounded-full transition"
+          >
+            Profile
+          </Link>
+        )}
+
+        {!isAuthenticated ? (
+          <Link
+            href="/login"
+            className="bg-[#353846] hover:bg-[#8458B3] text-white text-xs font-medium px-4 py-1.5 rounded-full border border-white/10 transition shadow-sm"
+          >
+            Log In
+          </Link>
+        ) : (
+          <button
+            onClick={handleSignOut}
+            className="bg-red-500/20 hover:bg-red-500/30 text-red-200 text-xs font-medium px-4 py-1.5 rounded-full border border-red-500/30 transition shadow-sm cursor-pointer"
+          >
+            Sign Out
+          </button>
+        )}
+      </div>
+    </nav>
   );
 }
