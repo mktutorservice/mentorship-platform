@@ -104,9 +104,9 @@ export default function LandingPage() {
             </span>
           </h1>
 
-          <p className="font-tech gold-text text-xs md:text-sm max-w-lg leading-relaxed uppercase tracking-wider">
-            Accelerate your engineering workflow through direct peer collaboration, structured 
-            learning frameworks, and personalized technical mentorship tailored to your targets.
+          {/* UPDATED HERO PARAGRAPH COPY & COLOR */}
+          <p className="font-tech text-gray-300 text-xs md:text-sm max-w-lg leading-relaxed uppercase tracking-wider">
+            Empowering students, parents, and mentors through seamless connection, live video tutoring, and secure identity verification. Build skills, track progress, and grow together in one unified learning hub.
           </p>
 
           <div className="pt-2">
@@ -153,9 +153,7 @@ export default function LandingPage() {
             </h2>
 
             <p className="font-tech text-xs md:text-sm text-gray-300 leading-relaxed max-w-xl tracking-wide">
-              We connect aspiring developers and engineers with industry-vetted mentors to bridge the gap 
-              between academic theory and hands-on production code. Engage in live classrooms, request 
-              detailed code architecture reviews, and build real-world software together.
+              We connect mentors, students, and parents seamlessly in one unified hub. Browse vetted mentor profiles, book live video tutoring sessions, and track learning progress. Built on Supabase and Vercel with direct mobile integration, our goal is to foster an active learning community supported by identity verification and tailored subscription plans.
             </p>
 
             <div className="pt-4">

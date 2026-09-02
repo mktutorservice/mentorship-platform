@@ -1,17 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Orbitron:wght@500;700;900&display=swap');
 @import "tailwindcss";
 
 :root {
-  /* Minimal Purple & Navy Palette */
+  /* Dark Theme Canvas & Text Tokens */
+  --background: #0f0f17;
+  --foreground: #ffffff;
+  --color-surface: #151521;
+  --color-border-light: rgba(255, 255, 255, 0.1);
+
+  /* Brand Accent Tokens */
   --sky-blue: #A0D2EB;
-  --mist: #E5EAF5;
+  --mist: #ffffff;
   --lavender: #D0BDF4;
   --purple: #8458B3;
-  --slate-navy: #494D5F;
+  --slate-navy: #111827;
 
-  --background: var(--mist);
-  --foreground: var(--slate-navy);
-  --color-surface: #ffffff;
-  --color-border-light: var(--lavender);
+  /* Gold Color Tokens */
+  --gold-light: #FCF6BA;
+  --gold-mid: #B38728;
+  --gold-dark: #AA771C;
+  --gold-base: #BF953F;
 }
 
 @theme inline {
@@ -27,21 +35,59 @@
   --color-brand-purple: var(--purple);
   --color-brand-navy: var(--slate-navy);
 
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Gold Tokens */
+  --color-gold-base: var(--gold-base);
+  --color-gold-mid: var(--gold-mid);
+
+  /* Custom Font Families */
+  --font-sans: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+  --font-thamrah: 'Cinzel', serif;
+  --font-tech: 'Orbitron', sans-serif;
 }
 
-/* Force palette background across system preferences */
+/* Enforce Dark Canvas across all system preferences */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: var(--mist);
-    --foreground: var(--slate-navy);
+    --background: #0f0f17;
+    --foreground: #ffffff;
   }
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
   min-height: 100vh;
+}
+
+/* Custom Font Utilities */
+.font-thamrah {
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.1em;
+}
+
+.font-tech {
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 0.08em;
+}
+
+/* Metallic Golden Text Effect */
+.gold-text {
+  background: linear-gradient(135deg, #BF953F 0%, #FCF6BA 25%, #B38728 50%, #FBF5B7 75%, #AA771C 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+/* Golden Background Button Style */
+.gold-bg {
+  background: linear-gradient(135deg, #BF953F 0%, #FCF6BA 30%, #B38728 70%, #AA771C 100%);
+  color: #0f0f17;
+  transition: all 0.3s ease-in-out;
+}
+
+.gold-bg:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 10px 20px -5px rgba(179, 135, 40, 0.4);
 }
