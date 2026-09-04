@@ -1,473 +1,312 @@
-'use client';
-
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { supabase } from '@/lib/supabaseClient';
 
-export default function ProfilePage() {
-  const [mounted, setMounted] = useState<boolean>(false);
-  const [userId, setUserId] = useState<string | null>(null);
-
-  // User Profile State
-  const [role, setRole] = useState<string>('STUDENT');
-  const [userName, setUserName] = useState<string>('Alex Johnson');
-  const [userStatus, setUserStatus] = useState<string>('Available for tutoring sessions');
-  const [feeStatus, setFeeStatus] = useState<string>('Per Hour');
-  const [gender, setGender] = useState<string>('Prefer not to say');
-  const [privacy, setPrivacy] = useState<string>('Public');
-  const [avatarUrl, setAvatarUrl] = useState<string>('/card1.jpg');
-  const [isVerified, setIsVerified] = useState<boolean>(false);
-
-  // Contact Info State
-  const [phone, setPhone] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
-
-  // UI Controls
-  const [showSettings, setShowSettings] = useState<boolean>(false);
-  const [showContactsModal, setShowContactsModal] = useState<boolean>(false);
-  const [showPostModal, setShowPostModal] = useState<boolean>(false);
-  const [postContent, setPostContent] = useState<string>('');
-  const [saving, setSaving] = useState<boolean>(false);
-
-  useEffect(() => {
-    setMounted(true);
-
-    async function loadUserProfile() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return;
-
-      const currentUid = session.user.id;
-      setUserId(currentUid);
-      setEmail(session.user.email || '');
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', currentUid)
-        .maybeSingle();
-
-      if (profile) {
-        if (profile.name) setUserName(profile.name);
-        if (profile.role) setRole(profile.role);
-        if (profile.activity_status) setUserStatus(profile.activity_status);
-        if (profile.fee_status) setFeeStatus(profile.fee_status);
-        if (profile.gender) setGender(profile.gender);
-        if (profile.profile_picture) setAvatarUrl(profile.profile_picture);
-        if (profile.phone) setPhone(profile.phone);
-        if (profile.is_verified) setIsVerified(profile.is_verified);
-      }
-    }
-
-    loadUserProfile();
-  }, []);
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleSaveSettings = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!userId) return;
-
-    setSaving(true);
-
-    const payload = {
-      name: userName,
-      activity_status: userStatus,
-      fee_status: feeStatus,
-      gender: gender,
-      profile_picture: avatarUrl,
-      phone: phone,
-      updated_at: new Date().toISOString(),
-    };
-
-    const { error } = await supabase
-      .from('profiles')
-      .update(payload)
-      .eq('id', userId);
-
-    setSaving(false);
-
-    if (error) {
-      alert(`Error updating profile: ${error.message}`);
-    } else {
-      setShowSettings(false);
-      alert('Profile updated successfully!');
-    }
-  };
-
-  const handleCreatePost = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!postContent.trim() || !userId) return;
-
-    const { error } = await supabase.from('posts').insert({
-      author_id: userId,
-      content: postContent.trim(),
-      type: 'TEXT',
-      visibility: 'PUBLIC'
-    });
-
-    if (error) {
-      alert(`Failed to publish post: ${error.message}`);
-    } else {
-      alert('Post published to community feed!');
-      setPostContent('');
-      setShowPostModal(false);
-    }
-  };
-
-  const toggleVerification = async () => {
-    const nextStatus = !isVerified;
-    setIsVerified(nextStatus);
-    if (userId) {
-      await supabase.from('profiles').update({ is_verified: nextStatus }).eq('id', userId);
-    }
-  };
-
-  if (!mounted) return null;
-
+export default function LandingPage() {
   return (
-    <main className="relative min-h-screen bg-[#0d0e15] text-white selection:bg-[#B38728] selection:text-white overflow-hidden pb-16 font-sans">
+    <main className="min-h-screen bg-[#0f0f17] text-white flex flex-col justify-between selection:bg-[#B38728] selection:text-white">
       
-      {/* BACKGROUND LAYER */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="/bg-tech.jpg"
-          alt="Profile Background"
-          fill
-          priority
-          className="object-cover object-center opacity-20 mix-blend-screen transition-all duration-700"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0d0e15]/80 via-[#0d0e15]/60 to-[#0d0e15]" />
-      </div>
-
-      {/* TOP NAVIGATION ICONS */}
-      <header className="relative z-20 w-full max-w-7xl mx-auto px-6 py-4 flex items-center justify-end">
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => setShowContactsModal(true)}
-            className="p-2 rounded-full hover:bg-white/10 transition duration-300 relative group cursor-pointer"
-            title="My Contacts"
+      {/* HEADER NAVBAR WITH GEOMETRIC LOGO & LOGIN BUTTON */}
+      <header className="w-full max-w-7xl mx-auto flex items-center justify-between p-6 md:p-10 z-30">
+        
+        {/* GEOMETRIC LOGO: UNKNOWN MENTORSHIP */}
+        <Link href="/" className="flex items-center gap-2 group">
+          <svg
+            viewBox="0 0 470 32"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 md:h-6 w-auto"
           >
-            <Image 
-              src="/contacts.png" 
-              alt="My Contacts" 
-              width={24} 
-              height={24} 
-              className="object-contain"
-            />
-          </button>
+            {/* U */}
+            <path d="M5 2 V16 A6 6 0 0 0 17 16 V2" stroke="white" strokeWidth="3.5" strokeLinecap="square" />
+            
+            {/* N */}
+            <path d="M27 22 V2 L45 22 V2" stroke="white" strokeWidth="3.5" strokeLinecap="square" strokeLinejoin="miter" />
+            
+            {/* K */}
+            <path d="M55 2 V22 M69 2 L55 12 L69 22" stroke="white" strokeWidth="3.5" strokeLinecap="square" strokeLinejoin="miter" />
+            
+            {/* N */}
+            <path d="M79 22 V2 L97 22 V2" stroke="white" strokeWidth="3.5" strokeLinecap="square" strokeLinejoin="miter" />
+            
+            {/* O */}
+            <circle cx="117" cy="12" r="10" stroke="white" strokeWidth="3.5" />
+            
+            {/* W */}
+            <path d="M137 2 L143 22 L149 10 L155 22 L161 2" stroke="white" strokeWidth="3.5" strokeLinecap="square" strokeLinejoin="miter" />
+            
+            {/* N */}
+            <path d="M171 22 V2 L189 22 V2" stroke="white" strokeWidth="3.5" strokeLinecap="square" strokeLinejoin="miter" />
 
-          <button 
-            onClick={toggleVerification}
-            className="p-2 rounded-full hover:bg-white/10 transition duration-300 relative group cursor-pointer"
-            title={isVerified ? "Account Verified" : "Verify Account"}
-          >
-            <Image 
-              src={isVerified ? "/verified.png" : "/unverified.png"} 
-              alt={isVerified ? "Verified User" : "Unverified User"} 
-              width={26} 
-              height={26} 
-              className="object-contain"
-            />
-          </button>
+            {/* M */}
+            <path d="M214 22 V2 L222 14 L230 2 V22" stroke="white" strokeWidth="3.5" strokeLinecap="square" strokeLinejoin="miter" />
+            
+            {/* E */}
+            <path d="M254 2 H240 V22 H254 M240 12 H250" stroke="white" strokeWidth="3.5" strokeLinecap="square" />
+            
+            {/* N */}
+            <path d="M264 22 V2 L282 22 V2" stroke="white" strokeWidth="3.5" strokeLinecap="square" strokeLinejoin="miter" />
+            
+            {/* T */}
+            <path d="M292 2 H312 M302 2 V22" stroke="white" strokeWidth="3.5" strokeLinecap="square" />
+            
+            {/* O */}
+            <circle cx="328" cy="12" r="10" stroke="white" strokeWidth="3.5" />
+            
+            {/* R */}
+            <path d="M346 22 V2 H356 A5 5 0 0 1 356 12 H346 M354 12 L362 22" stroke="white" strokeWidth="3.5" strokeLinecap="square" />
+            
+            {/* S */}
+            <path d="M384 6 C384 2, 372 2, 372 7 C372 12, 384 12, 384 17 C384 22, 372 22, 372 18" stroke="white" strokeWidth="3.5" strokeLinecap="square" />
+            
+            {/* H */}
+            <path d="M394 2 V22 M394 12 H410 M410 2 V22" stroke="white" strokeWidth="3.5" strokeLinecap="square" />
+            
+            {/* I */}
+            <path d="M420 2 V22" stroke="white" strokeWidth="3.5" strokeLinecap="square" />
+            
+            {/* P */}
+            <path d="M430 22 V2 H442 A5 5 0 0 1 442 12 H430" stroke="white" strokeWidth="3.5" strokeLinecap="square" />
 
-          <button 
-            onClick={() => setShowSettings(!showSettings)}
-            className="p-2 rounded-full hover:bg-white/10 transition duration-300 cursor-pointer"
-            title="Settings"
-          >
-            <Image 
-              src="/settings.png" 
-              alt="Settings" 
-              width={22} 
-              height={22} 
-              className="object-contain"
-            />
-          </button>
-        </div>
+            {/* ACCENT PERIOD */}
+            <rect x="452" y="18" width="4" height="4" fill="#B38728" />
+          </svg>
+        </Link>
+
+        {/* LOGIN BUTTON */}
+        <Link 
+          href="/login" 
+          className="relative inline-block hover:scale-105 transition-transform duration-300"
+        >
+          <Image
+            src="/login-btn.png"
+            alt="Login"
+            width={70}
+            height={40}
+            className="brightness-0 invert object-contain h-auto w-16 md:w-20" 
+            priority
+          />
+        </Link>
       </header>
 
-      {/* MAIN CONTAINER */}
-      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 space-y-8">
-        
-        {/* Profile Card Header (POSITIONED AT TOP) */}
-        <div className="bg-[#151622] border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col md:flex-row items-center gap-6">
-          <div className="relative">
-            <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-2 border-[#B38728]/50 bg-[#252538] shadow-2xl flex items-center justify-center font-black text-[#B38728] text-3xl">
-              {avatarUrl ? (
-                <img src={avatarUrl} alt={userName} className="w-full h-full object-cover" />
-              ) : (
-                userName.charAt(0)
-              )}
-            </div>
-            {isVerified && (
-              <span className="absolute -bottom-2 -right-2 bg-[#B38728] text-black w-7 h-7 rounded-full flex items-center justify-center font-black text-xs shadow-lg border-2 border-[#141420]">
-                ✓
-              </span>
-            )}
+      {/* SECTION 1: HERO / TOP SECTION */}
+      <section className="relative w-full max-w-7xl mx-auto px-6 py-12 md:py-20 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="relative space-y-6 z-10">
+          <span className="absolute -top-10 -left-6 text-7xl md:text-9xl font-black text-white/5 select-none pointer-events-none uppercase tracking-tighter">
+            Connect
+          </span>
+
+          <h1 className="text-4xl md:text-6xl tracking-tight leading-tight">
+            {/* ENTITLEMENTS USING GUKA FONT */}
+            <span className="font-guka gold-text text-5xl md:text-7xl block mb-2 uppercase tracking-wide">
+              Entitlements
+            </span>
+            {/* & GROWTH STRATEGY IN HEAVY SANS FONT */}
+            <span className="text-white font-black tracking-tight block">
+              & Growth Strategy
+            </span>
+          </h1>
+
+          <p className="font-tech text-gray-300 text-xs md:text-sm max-w-lg leading-relaxed uppercase tracking-wider">
+            Empowering students, parents, and mentors through seamless connection, live video tutoring, and secure identity verification. Build skills, track progress, and grow together in one unified learning hub.
+          </p>
+
+          <div className="pt-2">
+            <Link
+              href="/login"
+              className="gold-bg font-tech inline-block font-bold text-xs uppercase tracking-wider px-8 py-3.5 rounded-lg shadow-xl hover:scale-105 transition duration-300"
+            >
+              START UR JOURNEY WITH US
+            </Link>
+          </div>
+        </div>
+
+        <div className="relative w-full h-[320px] md:h-[420px] rounded-3xl overflow-hidden border border-white/10 shadow-2xl group">
+          <Image
+            src="/card1.jpg"
+            alt="Mentorship Platform Hero"
+            fill
+            priority
+            className="object-cover group-hover:scale-105 transition duration-700 ease-out"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0f0f17] via-transparent to-transparent opacity-60" />
+        </div>
+      </section>
+
+      {/* SECTION 2: ABOUT / FEATURE SECTION */}
+      <section className="relative w-full bg-[#151521] py-20 border-t border-white/5 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="relative w-full h-[350px] md:h-[480px] rounded-2xl overflow-hidden shadow-2xl [clip-path:polygon(0_0,100%_8%,88%_100%,0_100%)] border border-white/10">
+            <Image
+              src="/card2.jpg"
+              alt="About Our Platform"
+              fill
+              className="object-cover hover:scale-105 transition duration-700 ease-out"
+            />
           </div>
 
-          <div className="flex-1 text-center md:text-left space-y-3">
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">{userName}</h2>
-              <span className="text-[10px] px-3 py-1 rounded-md font-bold tracking-wider uppercase bg-[#B38728]/20 text-[#FCF6BA] border border-[#B38728]/40">
-                {role}
-              </span>
-              <span className="text-[10px] px-3 py-1 rounded-md font-bold tracking-wider uppercase bg-white/5 text-gray-400 border border-white/10">
-                {privacy}
-              </span>
-            </div>
-            
-            <p className="text-xs sm:text-sm text-gray-400 italic max-w-xl">
-              "{userStatus}"
+          <div className="relative space-y-6">
+            <span className="absolute -top-12 right-0 text-7xl md:text-9xl font-black text-white/5 select-none pointer-events-none uppercase tracking-tighter">
+              About
+            </span>
+
+            <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white">
+              About <span className="gold-text font-guka">Us</span>
+            </h2>
+
+            <p className="font-tech text-xs md:text-sm text-gray-300 leading-relaxed max-w-xl tracking-wide">
+              We connect mentors, students, and parents seamlessly in one unified hub. Browse vetted mentor profiles, book live video tutoring sessions, and track learning progress. Built on Supabase and Vercel with direct mobile integration, our goal is to foster an active learning community supported by identity verification and tailored subscription plans.
             </p>
-            
-            <div className="flex flex-wrap justify-center md:justify-start gap-4 text-xs text-gray-300 pt-1">
-              <span><strong className="text-white">Gender:</strong> {gender}</span>
-              <span className="text-white/20">•</span>
-              <span><strong className="text-white">Fee Status:</strong> {feeStatus}</span>
+
+            <div className="pt-4">
+              <Link
+                href="/login"
+                className="gold-bg font-tech inline-block font-bold text-xs uppercase tracking-wider px-8 py-3.5 rounded-lg shadow-xl hover:scale-105 transition duration-300"
+              >
+                View More
+              </Link>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Quick Action to Add Post directly within profile card */}
-          <div className="self-end md:self-center">
-            <button
-              onClick={() => setShowPostModal(true)}
-              className="text-xs font-bold bg-[#B38728] hover:bg-[#c29532] text-black px-4 py-2 rounded-xl transition shadow-lg cursor-pointer"
-            >
-              + Add Post
-            </button>
-          </div>
+      {/* SECTION 3: 3-CARD CLASSROOMS GRID */}
+      <section className="w-full max-w-7xl mx-auto px-6 py-20 space-y-12">
+        <div className="text-center space-y-3">
+          <span className="text-xs uppercase tracking-[0.3em] gold-text font-tech font-semibold">
+            LEVERAGE YOUR FUTURE
+          </span>
+          <h2 className="text-4xl md:text-6xl font-serif tracking-tight text-white">
+            Explore Active <span className="italic font-normal gold-text">Classrooms</span>
+          </h2>
+          <p className="text-xs md:text-sm text-gray-400 max-w-lg mx-auto font-light leading-relaxed">
+            Choose a path to level up your technical domain with guided sessions, 1-on-1 feedback, and peer collaboration.
+          </p>
         </div>
 
-        {/* Edit Profile Form */}
-        {showSettings && (
-          <div className="bg-[#151622] border border-[#B38728]/30 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
-            <h3 className="text-base font-bold text-white border-b border-white/10 pb-3 flex items-center gap-2">
-              <span>⚙️</span> Edit Profile Details
-            </h3>
-
-            <form onSubmit={handleSaveSettings} className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-              <div className="space-y-1">
-                <label className="block text-gray-300 font-semibold">Full Name</label>
-                <input 
-                  type="text"
-                  value={userName}
-                  onChange={(e) => setUserName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl bg-[#0f0f17] border border-white/10 text-white focus:outline-none focus:border-[#B38728]"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="block text-gray-300 font-semibold">Status Tagline</label>
-                <input 
-                  type="text"
-                  value={userStatus}
-                  onChange={(e) => setUserStatus(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl bg-[#0f0f17] border border-white/10 text-white focus:outline-none focus:border-[#B38728]"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="block text-gray-300 font-semibold">Fee Structure</label>
-                <select
-                  value={feeStatus}
-                  onChange={(e) => setFeeStatus(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl bg-[#0f0f17] border border-white/10 text-white focus:outline-none focus:border-[#B38728]"
-                >
-                  <option value="Per Hour">Per Hour</option>
-                  <option value="Per Week">Per Week</option>
-                  <option value="Per Month">Per Month</option>
-                  <option value="By Negotiation">By Negotiation</option>
-                </select>
-              </div>
-
-              <div className="space-y-1">
-                <label className="block text-gray-300 font-semibold">Gender</label>
-                <select
-                  value={gender}
-                  onChange={(e) => setGender(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl bg-[#0f0f17] border border-white/10 text-white focus:outline-none focus:border-[#B38728]"
-                >
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Prefer not to say">Prefer not to say</option>
-                </select>
-              </div>
-
-              <div className="space-y-1">
-                <label className="block text-gray-300 font-semibold">Profile Photo</label>
-                <input 
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="w-full px-4 py-2.5 rounded-2xl bg-[#0f0f17] border border-white/10 text-gray-300 text-xs file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#B38728] file:text-black cursor-pointer"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="block text-gray-300 font-semibold">Phone Contact</label>
-                <input 
-                  type="text"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl bg-[#0f0f17] border border-white/10 text-white focus:outline-none focus:border-[#B38728]"
-                />
-              </div>
-
-              <div className="md:col-span-2 pt-2 flex justify-end">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="bg-[#B38728] hover:bg-[#c29532] text-black font-extrabold px-6 py-3 rounded-2xl transition shadow-lg cursor-pointer disabled:opacity-50"
-                >
-                  {saving ? 'Saving...' : 'Save Changes'}
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* CLASSROOMS & PRIVATE HUB VIDEO CARDS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-4">
           
-          {/* CLASSROOMS VIDEO CARD */}
-          <Link href="/classrooms" className="group block">
-            <div className="bg-[#151622] border border-white/10 rounded-3xl p-6 flex flex-col items-center justify-between hover:border-[#B38728]/50 transition duration-300 shadow-2xl">
-              <div className="relative w-full h-60 rounded-2xl overflow-hidden bg-black border border-white/5 shadow-inner">
-                <video 
-                  autoPlay 
-                  loop 
-                  muted 
-                  playsInline
-                  preload="metadata"
-                  className="w-full h-full object-cover group-hover:scale-105 transition duration-500 ease-out pointer-events-none"
-                >
-                  <source src="/classrooms.mp4" type="video/mp4" />
-                </video>
-              </div>
-              <div className="pt-5 text-center">
-                <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-white group-hover:text-[#FCF6BA] transition">
-                  CLASSROOMS
-                </h3>
-              </div>
-            </div>
-          </Link>
-
-          {/* PRIVATE HUB VIDEO CARD */}
-          <Link href="/private-rooms" className="group block">
-            <div className="bg-[#151622] border border-white/10 rounded-3xl p-6 flex flex-col items-center justify-between hover:border-[#B38728]/50 transition duration-300 shadow-2xl">
-              <div className="relative w-full h-60 rounded-2xl overflow-hidden bg-black border border-white/5 shadow-inner">
-                <video 
-                  autoPlay 
-                  loop 
-                  muted 
-                  playsInline
-                  preload="metadata"
-                  className="w-full h-full object-cover group-hover:scale-105 transition duration-500 ease-out pointer-events-none"
-                >
-                  <source src="/private-hub.mp4" type="video/mp4" />
-                </video>
-              </div>
-              <div className="pt-5 text-center">
-                <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-white group-hover:text-[#FCF6BA] transition">
-                  PRIVATE HUB
-                </h3>
-              </div>
-            </div>
-          </Link>
-
-        </div>
-
-      </div>
-
-      {/* Contacts Modal */}
-      {showContactsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="bg-[#171722] border border-white/10 text-white p-6 rounded-3xl max-w-sm w-full shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <h2 className="text-base font-bold text-white">Contact Details</h2>
-              <button 
-                onClick={() => setShowContactsModal(false)}
-                className="text-gray-400 hover:text-white font-bold cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="space-y-3 text-xs">
-              <div className="bg-[#0f0f17] p-3.5 rounded-2xl border border-white/5 space-y-1">
-                <p className="text-[10px] text-[#B38728] font-bold uppercase tracking-wider">Email Address</p>
-                <p className="text-white font-medium truncate">{email || 'Not provided'}</p>
-              </div>
-
-              <div className="bg-[#0f0f17] p-3.5 rounded-2xl border border-white/5 space-y-1">
-                <p className="text-[10px] text-[#B38728] font-bold uppercase tracking-wider">Phone Number</p>
-                <p className="text-white font-medium">{phone || 'Not set'}</p>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setShowContactsModal(false)}
-              className="w-full bg-[#B38728] text-black font-bold py-3 rounded-2xl text-xs uppercase cursor-pointer"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Add Post Modal */}
-      {showPostModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="bg-[#171722] border border-white/10 text-white p-6 rounded-3xl max-w-md w-full shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <h2 className="text-base font-bold text-white">Create New Post</h2>
-              <button 
-                onClick={() => setShowPostModal(false)}
-                className="text-gray-400 hover:text-white font-bold cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleCreatePost} className="space-y-4">
-              <textarea
-                rows={4}
-                placeholder="Share updates with your peers or mentors..."
-                value={postContent}
-                onChange={(e) => setPostContent(e.target.value)}
-                className="w-full p-4 rounded-2xl bg-[#0f0f17] text-white border border-white/10 focus:outline-none focus:border-[#B38728] text-xs resize-none"
+          {/* Card 1 */}
+          <div className="bg-[#171722] border border-white/10 rounded-2xl p-6 flex flex-col justify-between space-y-6 hover:border-[#B38728]/60 transition duration-300 group shadow-2xl">
+            <div className="relative w-full h-52 rounded-xl overflow-hidden bg-gray-900">
+              <Image
+                src="/card1.jpg"
+                alt="Live Code Audits"
+                fill
+                className="object-cover group-hover:scale-105 transition duration-500 ease-out"
               />
+            </div>
 
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowPostModal(false)}
-                  className="px-4 py-2.5 rounded-2xl bg-white/5 text-gray-300 text-xs font-semibold hover:bg-white/10 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2.5 rounded-2xl bg-[#B38728] text-black text-xs font-bold transition shadow-lg"
-                >
-                  Publish
-                </button>
+            <div className="space-y-3 flex-1 flex flex-col justify-between">
+              <div>
+                <span className="text-[10px] uppercase tracking-[0.25em] gold-text font-tech font-bold">
+                  WORKSHOP
+                </span>
+                <h3 className="text-2xl font-serif text-white mt-1">
+                  Live Code Audits
+                </h3>
+                <p className="text-xs text-gray-400 font-light mt-2 leading-relaxed">
+                  Collaborative architecture, direct code refactoring, and real-time debugging sessions.
+                </p>
               </div>
-            </form>
+
+              <div className="pt-4 border-t border-white/5">
+                <Link
+                  href="/login"
+                  className="inline-flex items-center gap-3 text-xs font-semibold text-white group-hover:text-[#FCF6BA] transition"
+                >
+                  <span className="font-tech">Explore Hub</span>
+                  <span className="w-7 h-7 rounded-full border border-white/20 flex items-center justify-center group-hover:border-[#FCF6BA] group-hover:translate-x-1 transition duration-300">
+                    →
+                  </span>
+                </Link>
+              </div>
+            </div>
           </div>
+
+          {/* Card 2 */}
+          <div className="bg-[#171722] border border-white/10 rounded-2xl p-6 flex flex-col justify-between space-y-6 hover:border-[#B38728]/60 transition duration-300 group shadow-2xl">
+            <div className="relative w-full h-52 rounded-xl overflow-hidden bg-gray-900">
+              <Image
+                src="/card2.jpg"
+                alt="Personalized Mentorship"
+                fill
+                className="object-cover group-hover:scale-105 transition duration-500 ease-out"
+              />
+            </div>
+
+            <div className="space-y-3 flex-1 flex flex-col justify-between">
+              <div>
+                <span className="text-[10px] uppercase tracking-[0.25em] gold-text font-tech font-bold">
+                  1-ON-1 GUIDANCE
+                </span>
+                <h3 className="text-2xl font-serif text-white mt-1">
+                  Personal Mentorship
+                </h3>
+                <p className="text-xs text-gray-400 font-light mt-2 leading-relaxed">
+                  Tailored learning roadmaps, direct reviews, and scheduled consultations with experts.
+                </p>
+              </div>
+
+              <div className="pt-4 border-t border-white/5">
+                <Link
+                  href="/login"
+                  className="inline-flex items-center gap-3 text-xs font-semibold text-white group-hover:text-[#FCF6BA] transition"
+                >
+                  <span className="font-tech">Book Session</span>
+                  <span className="w-7 h-7 rounded-full border border-white/20 flex items-center justify-center group-hover:border-[#FCF6BA] group-hover:translate-x-1 transition duration-300">
+                    →
+                  </span>
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 3 */}
+          <div className="bg-[#171722] border border-white/10 rounded-2xl p-6 flex flex-col justify-between space-y-6 hover:border-[#B38728]/60 transition duration-300 group shadow-2xl">
+            <div className="relative w-full h-52 rounded-xl overflow-hidden bg-gray-900">
+              <Image
+                src="/card3.jpg"
+                alt="Peer Network"
+                fill
+                className="object-cover group-hover:scale-105 transition duration-500 ease-out"
+              />
+            </div>
+
+            <div className="space-y-3 flex-1 flex flex-col justify-between">
+              <div>
+                <span className="text-[10px] uppercase tracking-[0.25em] gold-text font-tech font-bold">
+                  COMMUNITY
+                </span>
+                <h3 className="text-2xl font-serif text-white mt-1">
+                  Peer Network
+                </h3>
+                <p className="text-xs text-gray-400 font-light mt-2 leading-relaxed">
+                  Share knowledge, manage team repos, and track real-time build progress with peers.
+                </p>
+              </div>
+
+              <div className="pt-4 border-t border-white/5">
+                <Link
+                  href="/login"
+                  className="inline-flex items-center gap-3 text-xs font-semibold text-white group-hover:text-[#FCF6BA] transition"
+                >
+                  <span className="font-tech">Join Community</span>
+                  <span className="w-7 h-7 rounded-full border border-white/20 flex items-center justify-center group-hover:border-[#FCF6BA] group-hover:translate-x-1 transition duration-300">
+                    →
+                  </span>
+                </Link>
+              </div>
+            </div>
+          </div>
+
         </div>
-      )}
+      </section>
+
+      {/* FOOTER */}
+      <footer className="w-full border-t border-white/5 py-8 text-center text-xs text-gray-500">
+        © {new Date().getFullYear()} MentorshipPlatform Inc. All rights reserved.
+      </footer>
+
     </main>
   );
 }
