@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { supabase } from '@/lib/supabaseClient';
 
 export default function ProfilePage() {
   const [mounted, setMounted] = useState<boolean>(false);
-  const [bgImage, setBgImage] = useState<string>('/hero-bg.jpg');
   const [userId, setUserId] = useState<string | null>(null);
 
   // User Profile State
@@ -16,27 +16,22 @@ export default function ProfilePage() {
   const [feeStatus, setFeeStatus] = useState<string>('Per Hour');
   const [gender, setGender] = useState<string>('Prefer not to say');
   const [privacy, setPrivacy] = useState<string>('Public');
-  const [avatarUrl, setAvatarUrl] = useState<string>('https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400');
+  const [avatarUrl, setAvatarUrl] = useState<string>('/card1.jpg');
   const [isVerified, setIsVerified] = useState<boolean>(false);
 
   // Contact Info State
   const [phone, setPhone] = useState<string>('');
   const [email, setEmail] = useState<string>('');
-  const [telegram, setTelegram] = useState<string>('');
 
   // UI Controls
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [showContactsModal, setShowContactsModal] = useState<boolean>(false);
-  const [showFullPP, setShowFullPP] = useState<boolean>(false);
   const [showPostModal, setShowPostModal] = useState<boolean>(false);
   const [postContent, setPostContent] = useState<string>('');
   const [saving, setSaving] = useState<boolean>(false);
 
   useEffect(() => {
     setMounted(true);
-
-    const savedBg = localStorage.getItem('user_bg_image');
-    if (savedBg) setBgImage(savedBg);
 
     async function loadUserProfile() {
       const { data: { session } } = await supabase.auth.getSession();
@@ -46,7 +41,6 @@ export default function ProfilePage() {
       setUserId(currentUid);
       setEmail(session.user.email || '');
 
-      // Fetch row directly from profiles table
       const { data: profile } = await supabase
         .from('profiles')
         .select('*')
@@ -79,7 +73,6 @@ export default function ProfilePage() {
     }
   };
 
-  // Syncs to Supabase profiles table
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userId) return;
@@ -107,7 +100,7 @@ export default function ProfilePage() {
       alert(`Error updating profile: ${error.message}`);
     } else {
       setShowSettings(false);
-      alert('Profile updated successfully in Supabase!');
+      alert('Profile updated successfully!');
     }
   };
 
@@ -125,123 +118,171 @@ export default function ProfilePage() {
     if (error) {
       alert(`Failed to publish post: ${error.message}`);
     } else {
-      alert('Post published to feed!');
+      alert('Post published to community feed!');
       setPostContent('');
       setShowPostModal(false);
+    }
+  };
+
+  const toggleVerification = async () => {
+    const nextStatus = !isVerified;
+    setIsVerified(nextStatus);
+    if (userId) {
+      await supabase.from('profiles').update({ is_verified: nextStatus }).eq('id', userId);
     }
   };
 
   if (!mounted) return null;
 
   return (
-    <main 
-      className="min-h-screen bg-cover bg-center bg-fixed relative flex justify-center p-4 transition-all duration-500 py-10"
-      style={{ backgroundImage: `url('${bgImage}')` }}
-    >
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+    <main className="relative min-h-screen bg-[#0d0e15] text-white selection:bg-[#B38728] selection:text-white overflow-hidden pb-16 font-sans">
+      
+      {/* BACKGROUND LAYER */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src="/bg-tech.jpg"
+          alt="Profile Background"
+          fill
+          priority
+          className="object-cover object-center opacity-20 mix-blend-screen transition-all duration-700"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0d0e15]/80 via-[#0d0e15]/60 to-[#0d0e15]" />
+      </div>
 
-      <section className="relative z-10 w-full max-w-4xl space-y-6">
-        
-        {/* Navigation Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 bg-[#494D5F]/90 backdrop-blur-md text-white p-4 rounded-3xl border border-white/10 shadow-xl">
-          <Link 
-            href="/feed" 
-            className="text-xs font-semibold bg-[#353846] hover:bg-[#8458B3] text-white px-4 py-2 rounded-full border border-white/10 transition"
+      {/* TOP NAVIGATION ICONS */}
+      <header className="relative z-20 w-full max-w-7xl mx-auto px-6 py-4 flex items-center justify-end">
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setShowContactsModal(true)}
+            className="p-2 rounded-full hover:bg-white/10 transition duration-300 relative group cursor-pointer"
+            title="My Contacts"
           >
-            ← Back to Home
-          </Link>
-
-          <h1 className="text-xl font-bold text-[#A0D2EB]">User Profile</h1>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowPostModal(true)}
-              className="text-xs font-semibold bg-[#8458B3] hover:bg-[#D0BDF4] text-white hover:text-[#494D5F] px-4 py-2 rounded-full transition cursor-pointer"
-            >
-              ➕ Add Post
-            </button>
-            <button
-              onClick={() => setShowSettings(!showSettings)}
-              className="text-xs font-semibold bg-[#353846] hover:bg-[#8458B3] text-white px-4 py-2 rounded-full border border-white/10 transition cursor-pointer"
-            >
-              {showSettings ? 'Close Settings' : '⚙️ Settings'}
-            </button>
-          </div>
-        </div>
-
-        {/* Profile Header */}
-        <div className="bg-[#494D5F]/90 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-white/10 text-white flex flex-col md:flex-row items-center gap-6">
-          <div className="relative cursor-pointer group" onClick={() => setShowFullPP(true)}>
-            <img 
-              src={avatarUrl} 
-              alt={userName} 
-              className="w-28 h-28 rounded-full object-cover border-4 border-[#8458B3] shadow-lg transition transform group-hover:scale-105"
+            <Image 
+              src="/contacts.png" 
+              alt="My Contacts" 
+              width={24} 
+              height={24} 
+              className="object-contain"
             />
-            <div className="absolute inset-0 bg-black/30 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-xs text-white font-medium">
-              View Photo
+          </button>
+
+          <button 
+            onClick={toggleVerification}
+            className="p-2 rounded-full hover:bg-white/10 transition duration-300 relative group cursor-pointer"
+            title={isVerified ? "Account Verified" : "Verify Account"}
+          >
+            <Image 
+              src={isVerified ? "/verified.png" : "/unverified.png"} 
+              alt={isVerified ? "Verified User" : "Unverified User"} 
+              width={26} 
+              height={26} 
+              className="object-contain"
+            />
+          </button>
+
+          <button 
+            onClick={() => setShowSettings(!showSettings)}
+            className="p-2 rounded-full hover:bg-white/10 transition duration-300 cursor-pointer"
+            title="Settings"
+          >
+            <Image 
+              src="/settings.png" 
+              alt="Settings" 
+              width={22} 
+              height={22} 
+              className="object-contain"
+            />
+          </button>
+        </div>
+      </header>
+
+      {/* MAIN CONTAINER */}
+      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 space-y-8">
+        
+        {/* Profile Card Header */}
+        <div className="bg-[#151622] border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col md:flex-row items-center gap-6">
+          <div className="relative">
+            <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-2 border-[#B38728]/50 bg-[#252538] shadow-2xl flex items-center justify-center font-black text-[#B38728] text-3xl">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt={userName} className="w-full h-full object-cover" />
+              ) : (
+                userName.charAt(0)
+              )}
             </div>
             {isVerified && (
-              <span className="absolute bottom-0 right-0 bg-[#A0D2EB] text-[#494D5F] p-1 rounded-full text-xs font-bold shadow">
+              <span className="absolute -bottom-2 -right-2 bg-[#B38728] text-black w-7 h-7 rounded-full flex items-center justify-center font-black text-xs shadow-lg border-2 border-[#141420]">
                 ✓
               </span>
             )}
           </div>
 
-          <div className="flex-1 text-center md:text-left space-y-2">
+          <div className="flex-1 text-center md:text-left space-y-3">
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-              <h2 className="text-2xl font-bold text-white">{userName}</h2>
-              <span className="px-3 py-1 bg-[#8458B3] text-white text-xs font-semibold rounded-full uppercase">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">{userName}</h2>
+              <span className="text-[10px] px-3 py-1 rounded-md font-bold tracking-wider uppercase bg-[#B38728]/20 text-[#FCF6BA] border border-[#B38728]/40">
                 {role}
               </span>
-              <span className="px-3 py-1 bg-[#353846] text-[#A0D2EB] text-xs font-semibold rounded-full">
+              <span className="text-[10px] px-3 py-1 rounded-md font-bold tracking-wider uppercase bg-white/5 text-gray-400 border border-white/10">
                 {privacy}
               </span>
             </div>
             
-            <p className="text-sm text-[#E5EAF5] italic">"{userStatus}"</p>
+            <p className="text-xs sm:text-sm text-gray-400 italic max-w-xl">
+              "{userStatus}"
+            </p>
             
-            <div className="flex flex-wrap justify-center md:justify-start gap-4 text-xs text-[#E5EAF5] pt-1">
-              <span><strong>Gender:</strong> {gender}</span>
-              <span>•</span>
-              <span><strong>Fee Status:</strong> {feeStatus}</span>
+            <div className="flex flex-wrap justify-center md:justify-start gap-4 text-xs text-gray-300 pt-1">
+              <span><strong className="text-white">Gender:</strong> {gender}</span>
+              <span className="text-white/20">•</span>
+              <span><strong className="text-white">Fee Status:</strong> {feeStatus}</span>
             </div>
+          </div>
+
+          {/* Quick Action to Add Post */}
+          <div className="self-end md:self-center">
+            <button
+              onClick={() => setShowPostModal(true)}
+              className="text-xs font-bold bg-[#B38728] hover:bg-[#c29532] text-black px-4 py-2 rounded-xl transition shadow-lg cursor-pointer"
+            >
+              + Add Post
+            </button>
           </div>
         </div>
 
         {/* Edit Profile Form */}
         {showSettings && (
-          <div className="bg-[#494D5F]/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-[#D0BDF4]/40 text-white space-y-4">
-            <h3 className="text-lg font-bold text-[#A0D2EB] border-b border-white/10 pb-2">
-              Edit Profile Details
+          <div className="bg-[#151622] border border-[#B38728]/30 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+            <h3 className="text-base font-bold text-white border-b border-white/10 pb-3 flex items-center gap-2">
+              <span>⚙️</span> Edit Profile Details
             </h3>
 
             <form onSubmit={handleSaveSettings} className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-              <div>
-                <label className="block mb-1 text-[#E5EAF5] font-semibold">Edit Name</label>
+              <div className="space-y-1">
+                <label className="block text-gray-300 font-semibold">Full Name</label>
                 <input 
                   type="text"
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-full bg-[#353846] border border-white/10 text-white focus:outline-none focus:border-[#D0BDF4]"
+                  className="w-full px-4 py-3 rounded-2xl bg-[#0f0f17] border border-white/10 text-white focus:outline-none focus:border-[#B38728]"
                 />
               </div>
 
-              <div>
-                <label className="block mb-1 text-[#E5EAF5] font-semibold">Edit Status</label>
+              <div className="space-y-1">
+                <label className="block text-gray-300 font-semibold">Status Tagline</label>
                 <input 
                   type="text"
                   value={userStatus}
                   onChange={(e) => setUserStatus(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-full bg-[#353846] border border-white/10 text-white focus:outline-none focus:border-[#D0BDF4]"
+                  className="w-full px-4 py-3 rounded-2xl bg-[#0f0f17] border border-white/10 text-white focus:outline-none focus:border-[#B38728]"
                 />
               </div>
 
-              <div>
-                <label className="block mb-1 text-[#E5EAF5] font-semibold">Fee Status</label>
+              <div className="space-y-1">
+                <label className="block text-gray-300 font-semibold">Fee Structure</label>
                 <select
                   value={feeStatus}
                   onChange={(e) => setFeeStatus(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-full bg-[#353846] border border-white/10 text-white focus:outline-none focus:border-[#D0BDF4]"
+                  className="w-full px-4 py-3 rounded-2xl bg-[#0f0f17] border border-white/10 text-white focus:outline-none focus:border-[#B38728]"
                 >
                   <option value="Per Hour">Per Hour</option>
                   <option value="Per Week">Per Week</option>
@@ -250,12 +291,12 @@ export default function ProfilePage() {
                 </select>
               </div>
 
-              <div>
-                <label className="block mb-1 text-[#E5EAF5] font-semibold">Gender</label>
+              <div className="space-y-1">
+                <label className="block text-gray-300 font-semibold">Gender</label>
                 <select
                   value={gender}
                   onChange={(e) => setGender(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-full bg-[#353846] border border-white/10 text-white focus:outline-none focus:border-[#D0BDF4]"
+                  className="w-full px-4 py-3 rounded-2xl bg-[#0f0f17] border border-white/10 text-white focus:outline-none focus:border-[#B38728]"
                 >
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
@@ -263,23 +304,23 @@ export default function ProfilePage() {
                 </select>
               </div>
 
-              <div>
-                <label className="block mb-1 text-[#E5EAF5] font-semibold">Upload Profile Picture</label>
+              <div className="space-y-1">
+                <label className="block text-gray-300 font-semibold">Profile Photo</label>
                 <input 
                   type="file"
                   accept="image/*"
                   onChange={handleImageUpload}
-                  className="w-full px-4 py-2 rounded-full bg-[#353846] border border-white/10 text-white text-xs file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#8458B3] file:text-white cursor-pointer"
+                  className="w-full px-4 py-2.5 rounded-2xl bg-[#0f0f17] border border-white/10 text-gray-300 text-xs file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#B38728] file:text-black cursor-pointer"
                 />
               </div>
 
-              <div>
-                <label className="block mb-1 text-[#E5EAF5] font-semibold">Phone Number</label>
+              <div className="space-y-1">
+                <label className="block text-gray-300 font-semibold">Phone Contact</label>
                 <input 
                   type="text"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-full bg-[#353846] border border-white/10 text-white focus:outline-none focus:border-[#D0BDF4]"
+                  className="w-full px-4 py-3 rounded-2xl bg-[#0f0f17] border border-white/10 text-white focus:outline-none focus:border-[#B38728]"
                 />
               </div>
 
@@ -287,83 +328,97 @@ export default function ProfilePage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="bg-[#8458B3] hover:bg-[#D0BDF4] text-white hover:text-[#494D5F] font-bold px-6 py-2.5 rounded-full transition shadow-md cursor-pointer disabled:opacity-50"
+                  className="bg-[#B38728] hover:bg-[#c29532] text-black font-extrabold px-6 py-3 rounded-2xl transition shadow-lg cursor-pointer disabled:opacity-50"
                 >
-                  {saving ? 'Saving...' : 'Save Profile Changes'}
+                  {saving ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             </form>
           </div>
         )}
 
-        {/* Action Buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-          <Link
-            href="/classrooms"
-            className="flex items-center justify-center p-3.5 rounded-full bg-[#8458B3]/90 hover:bg-[#D0BDF4] text-white hover:text-[#494D5F] font-bold text-xs uppercase shadow-lg backdrop-blur-md transition-all border border-white/20 text-center"
-          >
-            Classrooms
+        {/* CLASSROOMS & PRIVATE HUB VIDEO CARDS */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2">
+          
+          {/* CLASSROOMS VIDEO CARD */}
+          <Link href="/classrooms" className="group block">
+            <div className="bg-[#151622] border border-white/10 rounded-3xl p-6 flex flex-col items-center justify-between hover:border-[#B38728]/50 transition duration-300 shadow-2xl">
+              <div className="relative w-full h-60 rounded-2xl overflow-hidden bg-black border border-white/5 shadow-inner">
+                <video 
+                  autoPlay 
+                  loop 
+                  muted 
+                  playsInline
+                  preload="auto"
+                  className="w-full h-full object-cover group-hover:scale-105 transition duration-500 ease-out pointer-events-none"
+                >
+                  <source src="/classrooms.mp4" type="video/mp4" />
+                </video>
+              </div>
+              <div className="pt-5 text-center">
+                <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-white group-hover:text-[#FCF6BA] transition">
+                  CLASSROOMS
+                </h3>
+              </div>
+            </div>
           </Link>
 
-          <Link
-            href="/private-rooms"
-            className="flex items-center justify-center p-3.5 rounded-full bg-[#8458B3]/90 hover:bg-[#D0BDF4] text-white hover:text-[#494D5F] font-bold text-xs uppercase shadow-lg backdrop-blur-md transition-all border border-white/20 text-center"
-          >
-            Private Hub
+          {/* PRIVATE HUB VIDEO CARD */}
+          <Link href="/private-rooms" className="group block">
+            <div className="bg-[#151622] border border-white/10 rounded-3xl p-6 flex flex-col items-center justify-between hover:border-[#B38728]/50 transition duration-300 shadow-2xl">
+              <div className="relative w-full h-60 rounded-2xl overflow-hidden bg-black border border-white/5 shadow-inner">
+                <video 
+                  autoPlay 
+                  loop 
+                  muted 
+                  playsInline
+                  preload="auto"
+                  className="w-full h-full object-cover group-hover:scale-105 transition duration-500 ease-out pointer-events-none"
+                >
+                  <source src="/private-hub.mp4" type="video/mp4" />
+                </video>
+              </div>
+              <div className="pt-5 text-center">
+                <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-white group-hover:text-[#FCF6BA] transition">
+                  PRIVATE HUB
+                </h3>
+              </div>
+            </div>
           </Link>
 
-          <button
-            onClick={() => setShowContactsModal(true)}
-            className="flex items-center justify-center p-3.5 rounded-full bg-[#8458B3]/90 hover:bg-[#D0BDF4] text-white hover:text-[#494D5F] font-bold text-xs uppercase shadow-lg backdrop-blur-md transition-all border border-white/20 text-center cursor-pointer"
-          >
-            My Contacts
-          </button>
-
-          <button
-            onClick={async () => {
-              if (userId) {
-                await supabase.from('profiles').update({ is_verified: true }).eq('id', userId);
-                setIsVerified(true);
-                alert('Account status updated to Verified!');
-              }
-            }}
-            className="flex items-center justify-center p-3.5 rounded-full bg-[#8458B3]/90 hover:bg-[#D0BDF4] text-white hover:text-[#494D5F] font-bold text-xs uppercase shadow-lg backdrop-blur-md transition-all border border-white/20 text-center cursor-pointer"
-          >
-            {isVerified ? '✓ Verified' : 'Verify Account'}
-          </button>
         </div>
 
-      </section>
+      </div>
 
       {/* Contacts Modal */}
       {showContactsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-[#494D5F] text-white p-6 rounded-3xl max-w-sm w-full border border-white/20 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="bg-[#171722] border border-white/10 text-white p-6 rounded-3xl max-w-sm w-full shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <h2 className="text-xl font-bold text-[#A0D2EB]">Contact Details</h2>
+              <h2 className="text-base font-bold text-white">Contact Details</h2>
               <button 
                 onClick={() => setShowContactsModal(false)}
-                className="text-gray-300 hover:text-white font-bold text-lg cursor-pointer"
+                className="text-gray-400 hover:text-white font-bold cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
-            <div className="space-y-3 text-sm">
-              <div className="bg-[#353846] p-3 rounded-2xl border border-white/5">
-                <p className="text-xs text-[#A0D2EB] font-semibold">Email</p>
-                <p className="text-white font-medium">{email || 'Not provided'}</p>
+            <div className="space-y-3 text-xs">
+              <div className="bg-[#0f0f17] p-3.5 rounded-2xl border border-white/5 space-y-1">
+                <p className="text-[10px] text-[#B38728] font-bold uppercase tracking-wider">Email Address</p>
+                <p className="text-white font-medium truncate">{email || 'Not provided'}</p>
               </div>
 
-              <div className="bg-[#353846] p-3 rounded-2xl border border-white/5">
-                <p className="text-xs text-[#A0D2EB] font-semibold">Phone</p>
+              <div className="bg-[#0f0f17] p-3.5 rounded-2xl border border-white/5 space-y-1">
+                <p className="text-[10px] text-[#B38728] font-bold uppercase tracking-wider">Phone Number</p>
                 <p className="text-white font-medium">{phone || 'Not set'}</p>
               </div>
             </div>
 
             <button
               onClick={() => setShowContactsModal(false)}
-              className="w-full bg-[#8458B3] hover:bg-[#D0BDF4] text-white hover:text-[#494D5F] font-bold py-2.5 rounded-full transition cursor-pointer text-xs uppercase"
+              className="w-full bg-[#B38728] text-black font-bold py-3 rounded-2xl text-xs uppercase cursor-pointer"
             >
               Close
             </button>
@@ -373,13 +428,13 @@ export default function ProfilePage() {
 
       {/* Add Post Modal */}
       {showPostModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-[#494D5F] text-white p-6 rounded-3xl max-w-md w-full border border-white/20 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="bg-[#171722] border border-white/10 text-white p-6 rounded-3xl max-w-md w-full shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <h2 className="text-xl font-bold text-[#A0D2EB]">Create New Post</h2>
+              <h2 className="text-base font-bold text-white">Create New Post</h2>
               <button 
                 onClick={() => setShowPostModal(false)}
-                className="text-gray-300 hover:text-white font-bold text-lg cursor-pointer"
+                className="text-gray-400 hover:text-white font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -391,22 +446,22 @@ export default function ProfilePage() {
                 placeholder="Share updates with your peers or mentors..."
                 value={postContent}
                 onChange={(e) => setPostContent(e.target.value)}
-                className="w-full p-4 rounded-2xl bg-[#353846] text-white border border-white/10 focus:outline-none focus:border-[#D0BDF4] text-xs resize-none"
+                className="w-full p-4 rounded-2xl bg-[#0f0f17] text-white border border-white/10 focus:outline-none focus:border-[#B38728] text-xs resize-none"
               />
 
               <div className="flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowPostModal(false)}
-                  className="px-4 py-2 rounded-full bg-[#353846] text-gray-300 text-xs font-semibold hover:bg-gray-600 transition"
+                  className="px-4 py-2.5 rounded-2xl bg-white/5 text-gray-300 text-xs font-semibold hover:bg-white/10 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 rounded-full bg-[#8458B3] hover:bg-[#D0BDF4] text-white hover:text-[#494D5F] text-xs font-semibold transition shadow-md"
+                  className="px-6 py-2.5 rounded-2xl bg-[#B38728] text-black text-xs font-bold transition shadow-lg"
                 >
-                  Publish Post
+                  Publish
                 </button>
               </div>
             </form>

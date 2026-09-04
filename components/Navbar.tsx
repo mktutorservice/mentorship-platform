@@ -45,7 +45,7 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-40 w-full bg-[#0f0f17]/90 backdrop-blur-md border-b border-white/10 text-white py-4 px-6 md:px-8 shadow-md flex items-center justify-between">
       
-      {/* GEOMETRIC LOGO */}
+      {/* BRAND LOGO */}
       <Link href="/feed" className="flex items-center gap-2 group">
         <svg
           viewBox="0 0 470 32"
@@ -74,9 +74,25 @@ export default function Navbar() {
         </svg>
       </Link>
 
-      {/* RIGHT ACTIONS */}
+      {/* NAVIGATION ACTIONS */}
       <div className="flex items-center space-x-3 text-xs">
         
+        {/* HOME ICON */}
+        <Link 
+          href="/feed"
+          className="relative flex items-center justify-center p-1 hover:scale-110 transition-transform duration-200"
+          title="Home Feed"
+        >
+          <Image 
+            src="/snow-house.png" 
+            alt="Home Feed" 
+            width={28} 
+            height={28} 
+            className="object-contain w-7 h-7"
+            priority
+          />
+        </Link>
+
         {/* PROFILE ICON */}
         <Link
           href="/profile"
@@ -100,7 +116,7 @@ export default function Navbar() {
           title="Settings"
         >
           <Image
-            src="/settings.png"
+            src="/sett.png"
             alt="Settings"
             width={32}
             height={32}
