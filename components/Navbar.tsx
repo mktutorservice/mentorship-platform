@@ -11,6 +11,7 @@ export default function Navbar() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [mounted, setMounted] = useState<boolean>(false);
+  const [isVerified, setIsVerified] = useState<boolean>(false);
 
   useEffect(() => {
     setMounted(true);
@@ -38,9 +39,15 @@ export default function Navbar() {
     router.push('/login');
   };
 
+  const toggleVerification = () => {
+    setIsVerified((prev) => !prev);
+  };
+
   if (pathname === '/' || pathname === '/login' || !mounted) {
     return null;
   }
+
+  const isProfilePage = pathname === '/profile';
 
   return (
     <nav className="sticky top-0 z-40 w-full bg-[#0f0f17]/90 backdrop-blur-md border-b border-white/10 text-white py-4 px-6 md:px-8 shadow-md flex items-center justify-between">
@@ -77,7 +84,7 @@ export default function Navbar() {
       {/* NAVIGATION ACTIONS */}
       <div className="flex items-center space-x-3 text-xs">
         
-        {/* HOME ICON */}
+        {/* HOME (SNOW HOUSE) ICON */}
         <Link 
           href="/feed"
           className="relative flex items-center justify-center p-1 hover:scale-110 transition-transform duration-200"
@@ -109,21 +116,103 @@ export default function Navbar() {
           />
         </Link>
 
-        {/* SETTINGS ICON */}
-        <Link
-          href="/settings"
-          className="relative flex items-center justify-center p-1 hover:scale-110 transition-transform duration-200"
-          title="Settings"
-        >
-          <Image
-            src="/sett.png"
-            alt="Settings"
-            width={32}
-            height={32}
-            className="brightness-0 invert object-contain w-7 h-7"
-            priority
-          />
-        </Link>
+        {/* PROFILE-SPECIFIC ACTION ICONS */}
+        {isProfilePage && (
+          <>
+            {/* PLUS ICON BUTTON */}
+            <button 
+              onClick={() => window.dispatchEvent(new CustomEvent('open-add-post-modal'))}
+              className="relative flex items-center justify-center p-1 hover:scale-110 transition-transform duration-200 cursor-pointer"
+              title="Create Post"
+            >
+              <Image 
+                src="/plus.png" 
+                alt="Add Post" 
+                width={28} 
+                height={28} 
+                className="object-contain w-7 h-7"
+                unoptimized
+              />
+            </button>
+
+            {/* CONTACTS ICON BUTTON */}
+            <button 
+              onClick={() => window.dispatchEvent(new CustomEvent('open-contacts-modal'))}
+              className="relative flex items-center justify-center p-1 hover:scale-110 transition-transform duration-200 cursor-pointer"
+              title="My Contacts"
+            >
+              <Image 
+                src="/contacts.png" 
+                alt="My Contacts" 
+                width={24} 
+                height={24} 
+                className="object-contain w-6 h-6"
+                style={{
+                  filter: 'invert(58%) sepia(85%) saturate(389%) hue-rotate(9deg) brightness(92%) contrast(88%)'
+                }}
+                unoptimized
+              />
+            </button>
+
+            {/* VERIFICATION ICON BUTTON */}
+            <button 
+              onClick={toggleVerification}
+              className="relative flex items-center justify-center p-1 hover:scale-110 transition-transform duration-200 cursor-pointer"
+              title={isVerified ? "Account Verified" : "Verify Account"}
+            >
+              <Image 
+                src={isVerified ? "/verified.png" : "/unverified.png"} 
+                alt={isVerified ? "Verified User" : "Unverified User"} 
+                width={26} 
+                height={26} 
+                className="object-contain w-6 h-6"
+                style={{
+                  filter: 'invert(58%) sepia(85%) saturate(389%) hue-rotate(9deg) brightness(92%) contrast(88%)'
+                }}
+                unoptimized
+              />
+            </button>
+          </>
+        )}
+
+        {/* SETTINGS / PROFILE SETTINGS ICON */}
+        {isProfilePage ? (
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('toggle-profile-settings'))}
+            className="relative flex items-center justify-center p-1 hover:scale-110 transition-transform duration-200 cursor-pointer"
+            title="Profile Settings"
+          >
+            <Image
+              src="/sett.png"
+              alt="Profile Settings"
+              width={32}
+              height={32}
+              className="object-contain w-7 h-7"
+              style={{
+                filter: 'invert(58%) sepia(85%) saturate(389%) hue-rotate(9deg) brightness(92%) contrast(88%)'
+              }}
+              priority
+            />
+          </button>
+        ) : (
+          <Link
+            href="/settings"
+            className="relative flex items-center justify-center p-1 hover:scale-110 transition-transform duration-200"
+            title="Settings"
+          >
+            <Image
+              src="/sett.png"
+              alt="Settings"
+              width={32}
+              height={32}
+              className="object-contain w-7 h-7"
+              style={{
+                filter: 'invert(58%) sepia(85%) saturate(389%) hue-rotate(9deg) brightness(92%) contrast(88%)'
+              }}
+              priority
+            />
+          </Link>
+        )}
 
         {/* SIGN OUT ICON */}
         <button
