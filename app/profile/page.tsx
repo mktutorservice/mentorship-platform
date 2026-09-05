@@ -143,7 +143,7 @@ export default function ProfilePage() {
       author_id: userId,
       content: postContent.trim(),
       type: 'TEXT',
-      visibility: 'PUBLIC'
+      visibility: 'PUBLIC',
     });
 
     if (error) {
@@ -279,107 +279,108 @@ export default function ProfilePage() {
               </button>
             </div>
 
-   {/* TAB CONTENT: SINGLE COLUMN EDIT PROFILE FORM */}
-{activeTab === 'profile' && (
-  <form onSubmit={handleSaveSettings} className="grid grid-cols-1 gap-5 text-xs animate-fadeIn max-w-2xl mx-auto">
-    <div className="space-y-1">
-      <label className="block text-gray-300 font-semibold">Full Name</label>
-      <input 
-        type="text"
-        value={userName}
-        onChange={(e) => setUserName(e.target.value)}
-        className="w-full px-4 py-3 rounded-2xl bg-[#0f0f17] border-2 border-[#B38728] text-white shadow-[0_0_8px_rgba(179,135,40,0.3)] focus:outline-none focus:scale-[1.02] focus:border-[#FCF6BA] focus:shadow-[0_0_18px_rgba(179,135,40,0.65)] transition-all duration-200"
-      />
-    </div>
+            {/* TAB CONTENT: SINGLE COLUMN EDIT PROFILE FORM */}
+            {activeTab === 'profile' && (
+              <form onSubmit={handleSaveSettings} className="grid grid-cols-1 gap-5 text-xs animate-fadeIn max-w-2xl mx-auto">
+                <div className="space-y-1">
+                  <label className="block text-gray-300 font-semibold">Full Name</label>
+                  <input 
+                    type="text"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl bg-[#0f0f17] border-2 border-[#B38728] text-white shadow-[0_0_8px_rgba(179,135,40,0.3)] focus:outline-none focus:scale-[1.02] focus:border-[#FCF6BA] focus:shadow-[0_0_18px_rgba(179,135,40,0.65)] transition-all duration-200"
+                  />
+                </div>
 
-    <div className="space-y-1">
-      <label className="block text-gray-300 font-semibold">User Name</label>
-      <input 
-        type="text"
-        value={handle}
-        onChange={(e) => setHandle(e.target.value)}
-        className="w-full px-4 py-3 rounded-2xl bg-[#0f0f17] border-2 border-[#B38728] text-white shadow-[0_0_8px_rgba(179,135,40,0.3)] focus:outline-none focus:scale-[1.02] focus:border-[#FCF6BA] focus:shadow-[0_0_18px_rgba(179,135,40,0.65)] transition-all duration-200"
-      />
-    </div>
+                <div className="space-y-1">
+                  <label className="block text-gray-300 font-semibold">User Name</label>
+                  <input 
+                    type="text"
+                    value={handle}
+                    onChange={(e) => setHandle(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl bg-[#0f0f17] border-2 border-[#B38728] text-white shadow-[0_0_8px_rgba(179,135,40,0.3)] focus:outline-none focus:scale-[1.02] focus:border-[#FCF6BA] focus:shadow-[0_0_18px_rgba(179,135,40,0.65)] transition-all duration-200"
+                  />
+                </div>
 
-    <div className="space-y-1">
-      <label className="block text-gray-300 font-semibold">Age</label>
-      <input 
-        type="number"
-        value={age}
-        onChange={(e) => setAge(e.target.value)}
-        className="w-full px-4 py-3 rounded-2xl bg-[#0f0f17] border-2 border-[#B38728] text-white shadow-[0_0_8px_rgba(179,135,40,0.3)] focus:outline-none focus:scale-[1.02] focus:border-[#FCF6BA] focus:shadow-[0_0_18px_rgba(179,135,40,0.65)] transition-all duration-200"
-      />
-    </div>
+                <div className="space-y-1">
+                  <label className="block text-gray-300 font-semibold">Age</label>
+                  <input 
+                    type="number"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl bg-[#0f0f17] border-2 border-[#B38728] text-white shadow-[0_0_8px_rgba(179,135,40,0.3)] focus:outline-none focus:scale-[1.02] focus:border-[#FCF6BA] focus:shadow-[0_0_18px_rgba(179,135,40,0.65)] transition-all duration-200"
+                  />
+                </div>
 
-    <div className="space-y-1">
-      <label className="block text-gray-300 font-semibold">Academic Information</label>
-      <input 
-        type="text"
-        value={academicInfo}
-        onChange={(e) => setAcademicInfo(e.target.value)}
-        className="w-full px-4 py-3 rounded-2xl bg-[#0f0f17] border-2 border-[#B38728] text-white shadow-[0_0_8px_rgba(179,135,40,0.3)] focus:outline-none focus:scale-[1.02] focus:border-[#FCF6BA] focus:shadow-[0_0_18px_rgba(179,135,40,0.65)] transition-all duration-200"
-      />
-    </div>
+                <div className="space-y-1">
+                  <label className="block text-gray-300 font-semibold">Academic Information</label>
+                  <input 
+                    type="text"
+                    value={academicInfo}
+                    onChange={(e) => setAcademicInfo(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl bg-[#0f0f17] border-2 border-[#B38728] text-white shadow-[0_0_8px_rgba(179,135,40,0.3)] focus:outline-none focus:scale-[1.02] focus:border-[#FCF6BA] focus:shadow-[0_0_18px_rgba(179,135,40,0.65)] transition-all duration-200"
+                  />
+                </div>
 
-    <div className="space-y-1">
-      <label className="block text-gray-300 font-semibold">Fee Structure</label>
-      <select
-        value={feeStatus}
-        onChange={(e) => setFeeStatus(e.target.value)}
-        className="w-full px-4 py-3 rounded-2xl bg-[#0f0f17] border-2 border-[#B38728] text-white shadow-[0_0_8px_rgba(179,135,40,0.3)] focus:outline-none focus:scale-[1.02] focus:border-[#FCF6BA] focus:shadow-[0_0_18px_rgba(179,135,40,0.65)] transition-all duration-200 cursor-pointer"
-      >
-        <option value="Per Hour">Per Hour</option>
-        <option value="Per Week">Per Week</option>
-        <option value="Per Month">Per Month</option>
-        <option value="By Negotiation">By Negotiation</option>
-      </select>
-    </div>
+                <div className="space-y-1">
+                  <label className="block text-gray-300 font-semibold">Fee Structure</label>
+                  <select
+                    value={feeStatus}
+                    onChange={(e) => setFeeStatus(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl bg-[#0f0f17] border-2 border-[#B38728] text-white shadow-[0_0_8px_rgba(179,135,40,0.3)] focus:outline-none focus:scale-[1.02] focus:border-[#FCF6BA] focus:shadow-[0_0_18px_rgba(179,135,40,0.65)] transition-all duration-200 cursor-pointer"
+                  >
+                    <option value="Per Hour">Per Hour</option>
+                    <option value="Per Week">Per Week</option>
+                    <option value="Per Month">Per Month</option>
+                    <option value="By Negotiation">By Negotiation</option>
+                  </select>
+                </div>
 
-    <div className="space-y-1">
-      <label className="block text-gray-300 font-semibold">Gender</label>
-      <select
-        value={gender}
-        onChange={(e) => setGender(e.target.value)}
-        className="w-full px-4 py-3 rounded-2xl bg-[#0f0f17] border-2 border-[#B38728] text-white shadow-[0_0_8px_rgba(179,135,40,0.3)] focus:outline-none focus:scale-[1.02] focus:border-[#FCF6BA] focus:shadow-[0_0_18px_rgba(179,135,40,0.65)] transition-all duration-200 cursor-pointer"
-      >
-        <option value="Male">Male</option>
-        <option value="Female">Female</option>
-        <option value="Prefer not to say">Prefer not to say</option>
-      </select>
-    </div>
+                <div className="space-y-1">
+                  <label className="block text-gray-300 font-semibold">Gender</label>
+                  <select
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl bg-[#0f0f17] border-2 border-[#B38728] text-white shadow-[0_0_8px_rgba(179,135,40,0.3)] focus:outline-none focus:scale-[1.02] focus:border-[#FCF6BA] focus:shadow-[0_0_18px_rgba(179,135,40,0.65)] transition-all duration-200 cursor-pointer"
+                  >
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                  </select>
+                </div>
 
-    <div className="space-y-1">
-      <label className="block text-gray-300 font-semibold">Phone Contact</label>
-      <input 
-        type="text"
-        value={phone}
-        onChange={(e) => setPhone(e.target.value)}
-        className="w-full px-4 py-3 rounded-2xl bg-[#0f0f17] border-2 border-[#B38728] text-white shadow-[0_0_8px_rgba(179,135,40,0.3)] focus:outline-none focus:scale-[1.02] focus:border-[#FCF6BA] focus:shadow-[0_0_18px_rgba(179,135,40,0.65)] transition-all duration-200"
-      />
-    </div>
+                <div className="space-y-1">
+                  <label className="block text-gray-300 font-semibold">Phone Contact</label>
+                  <input 
+                    type="text"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl bg-[#0f0f17] border-2 border-[#B38728] text-white shadow-[0_0_8px_rgba(179,135,40,0.3)] focus:outline-none focus:scale-[1.02] focus:border-[#FCF6BA] focus:shadow-[0_0_18px_rgba(179,135,40,0.65)] transition-all duration-200"
+                  />
+                </div>
 
-    <div className="space-y-1">
-      <label className="block text-gray-300 font-semibold">Profile Photo</label>
-      <input 
-        type="file"
-        accept="image/*"
-        onChange={handleImageUpload}
-        className="w-full px-4 py-2.5 rounded-2xl bg-[#0f0f17] border-2 border-[#B38728] text-gray-300 text-xs shadow-[0_0_8px_rgba(179,135,40,0.3)] file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#B38728] file:text-black cursor-pointer focus:outline-none focus:scale-[1.02] focus:border-[#FCF6BA] focus:shadow-[0_0_18px_rgba(179,135,40,0.65)] transition-all duration-200"
-      />
-    </div>
+                <div className="space-y-1">
+                  <label className="block text-gray-300 font-semibold">Profile Photo</label>
+                  <input 
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="w-full px-4 py-2.5 rounded-2xl bg-[#0f0f17] border-2 border-[#B38728] text-gray-300 text-xs shadow-[0_0_8px_rgba(179,135,40,0.3)] file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#B38728] file:text-black cursor-pointer focus:outline-none focus:scale-[1.02] focus:border-[#FCF6BA] focus:shadow-[0_0_18px_rgba(179,135,40,0.65)] transition-all duration-200"
+                  />
+                </div>
 
-    <div className="pt-3 flex justify-end">
-      <button
-        type="submit"
-        disabled={saving}
-        className="bg-[#B38728] hover:bg-[#c29532] text-black font-extrabold px-6 py-3 rounded-2xl transition shadow-[0_0_10px_rgba(179,135,40,0.4)] hover:shadow-[0_0_18px_rgba(179,135,40,0.8)] hover:scale-105 cursor-pointer disabled:opacity-50"
-      >
-        {saving ? 'Saving...' : 'Save Changes'}
-      </button>
-    </div>
-  </form>
-)}
+                <div className="pt-3 flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="bg-[#B38728] hover:bg-[#c29532] text-black font-extrabold px-6 py-3 rounded-2xl transition shadow-[0_0_10px_rgba(179,135,40,0.4)] hover:shadow-[0_0_18px_rgba(179,135,40,0.8)] hover:scale-105 cursor-pointer disabled:opacity-50"
+                  >
+                    {saving ? 'Saving...' : 'Save Changes'}
+                  </button>
+                </div>
+              </form>
+            )}
+
             {/* TAB CONTENT: PRIVACY & SECURITY */}
             {activeTab === 'privacy' && (
               <div className="space-y-4 text-xs animate-fadeIn max-w-2xl mx-auto">
@@ -544,26 +545,16 @@ export default function ProfilePage() {
           /* REGULAR PROFILE VIEW */
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2">
             
-            {/* CLASSROOMS VIDEO CARD */}
+            {/* CLASSROOMS IMAGE CARD */}
             <Link href="/classrooms" className="group block">
               <div className="bg-[#151622] border border-white/10 rounded-3xl p-6 flex flex-col items-center justify-between hover:border-[#B38728]/50 transition duration-300 shadow-2xl">
                 <div className="relative w-full h-60 rounded-2xl overflow-hidden bg-black border border-white/5 shadow-inner">
-                  <video 
-                    autoPlay 
-                    muted 
-                    playsInline
-                    preload="metadata"
-                    onLoadedMetadata={(e) => {
-                      e.currentTarget.currentTime = 3;
-                    }}
-                    onEnded={(e) => {
-                      e.currentTarget.currentTime = 3;
-                      e.currentTarget.play();
-                    }}
-                    className="w-full h-full object-cover group-hover:scale-105 transition duration-500 ease-out pointer-events-none"
-                  >
-                    <source src="/class.mp4" type="video/mp4" />
-                  </video>
+                  <Image
+                    src="/classroom0.jfif"
+                    alt="Classrooms"
+                    fill
+                    className="object-cover group-hover:scale-105 transition duration-500 ease-out"
+                  />
                 </div>
                 <div className="pt-5 text-center">
                   <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-white group-hover:text-[#FCF6BA] transition">
@@ -573,20 +564,16 @@ export default function ProfilePage() {
               </div>
             </Link>
 
-            {/* PRIVATE HUB VIDEO CARD */}
+            {/* PRIVATE HUB IMAGE CARD */}
             <Link href="/private-rooms" className="group block">
               <div className="bg-[#151622] border border-white/10 rounded-3xl p-6 flex flex-col items-center justify-between hover:border-[#B38728]/50 transition duration-300 shadow-2xl">
                 <div className="relative w-full h-60 rounded-2xl overflow-hidden bg-black border border-white/5 shadow-inner">
-                  <video 
-                    autoPlay 
-                    loop 
-                    muted 
-                    playsInline
-                    preload="auto"
-                    className="w-full h-full object-cover group-hover:scale-105 transition duration-500 ease-out pointer-events-none"
-                  >
-                    <source src="/private-hub.mp4" type="video/mp4" />
-                  </video>
+                  <Image
+                    src="/privatet.jfif"
+                    alt="Private Hub"
+                    fill
+                    className="object-cover group-hover:scale-105 transition duration-500 ease-out"
+                  />
                 </div>
                 <div className="pt-5 text-center">
                   <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-white group-hover:text-[#FCF6BA] transition">

@@ -25,7 +25,7 @@ export default function HomePage() {
   // Data States
   const [mentors, setMentors] = useState<MentorProfile[]>([]);
   const [loadingMentors, setLoadingMentors] = useState<boolean>(true);
-  const [totalPosts, setTotalPosts] = useState<number>(0);
+  const [visibleCount, setVisibleCount] = useState<number>(7);
 
   useEffect(() => {
     setMounted(true);
@@ -69,18 +69,15 @@ export default function HomePage() {
       const combinedData = [...(profilesData || []), ...formattedStudents];
       setMentors(combinedData);
 
-      // 4. Get live count of community posts
-      const { count } = await supabase
-        .from('posts')
-        .select('*', { count: 'exact', head: true });
-
-      if (count !== null) setTotalPosts(count);
-
       setLoadingMentors(false);
     }
 
     loadDashboardData();
   }, []);
+
+  const handleLoadMore = () => {
+    setVisibleCount((prev) => prev + 7);
+  };
 
   if (!mounted) return null;
 
@@ -190,46 +187,23 @@ export default function HomePage() {
           <h1 className="text-2xl md:text-4xl font-black tracking-tight text-white">
             Hello, <span className="text-[#B38728]">{userName}</span>
           </h1>
-          <p className="text-xs md:text-sm text-gray-400 max-w-xl">
-            Explore available mentorship sessions, join live interactive classrooms, or review community feed updates.
-          </p>
         </section>
 
-        {/* Dynamic Metrics Bar */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-[#171722]/60 border border-white/10 rounded-2xl p-4 backdrop-blur-md">
-            <span className="text-gray-400 text-xs font-medium uppercase tracking-wider">Active Mentors</span>
-            <p className="text-2xl font-black text-white mt-1">{mentors.length > 0 ? `${mentors.length}` : '0'}</p>
-          </div>
-          <div className="bg-[#171722]/60 border border-white/10 rounded-2xl p-4 backdrop-blur-md">
-            <span className="text-gray-400 text-xs font-medium uppercase tracking-wider">Live Classrooms</span>
-            <p className="text-2xl font-black text-white mt-1">12</p>
-          </div>
-          <div className="bg-[#171722]/60 border border-white/10 rounded-2xl p-4 backdrop-blur-md">
-            <span className="text-gray-400 text-xs font-medium uppercase tracking-wider">Community Posts</span>
-            <p className="text-2xl font-black text-white mt-1">{totalPosts > 0 ? `${totalPosts}+` : '140+'}</p>
-          </div>
-          <div className="bg-[#171722]/60 border border-white/10 rounded-2xl p-4 backdrop-blur-md">
-            <span className="text-gray-400 text-xs font-medium uppercase tracking-wider">Private Sessions</span>
-            <p className="text-2xl font-black text-white mt-1">8 Active</p>
-          </div>
-        </section>
-
-        {/* MODERNIZED AVAILABLE MENTORS GRID */}
+        {/* AVAILABLE MENTORS SINGLE-COLUMN LIST */}
         <section className="space-y-6">
-          <div className="flex items-center justify-between border-b border-white/10 pb-4">
-            <div>
-              <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-                Available Mentors
-                <span className="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-[#B38728]/20 text-[#B38728] border border-[#B38728]/30">
-                  {mentors.length}
-                </span>
-              </h2>
-              <p className="text-xs text-gray-400 mt-1">Connect directly with verified mentors and engineering guides.</p>
-            </div>
-            <Link href="/create-profile" className="text-xs font-bold text-[#B38728] hover:text-[#d1a33d] transition-colors flex items-center gap-1 bg-[#B38728]/10 px-3 py-1.5 rounded-xl border border-[#B38728]/20">
-              <span>+</span> Add Profile
-            </Link>
+          <div className="border-b border-white/10 pb-4">
+            <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-3">
+              {/* Mentorship Icon Box matching design */}
+              <div className="w-9 h-9 rounded-xl bg-[#B38728]/15 border border-[#B38728]/30 flex items-center justify-center text-[#B38728] shrink-0">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              </div>
+              <span>Available Mentors</span>
+              <span className="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-[#B38728]/20 text-[#B38728] border border-[#B38728]/30">
+                {mentors.length}
+              </span>
+            </h2>
           </div>
 
           {loadingMentors ? (
@@ -239,16 +213,17 @@ export default function HomePage() {
               No mentor profiles found in database.
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-h-[640px] overflow-y-auto pr-2 custom-scrollbar">
-              {mentors.map((mentor, index) => (
-                <div 
-                  key={mentor.id || index} 
-                  className="group relative bg-gradient-to-b from-[#1c1c2b]/90 to-[#141420]/90 hover:from-[#222233] hover:to-[#181826] border border-white/10 hover:border-[#B38728]/50 rounded-2xl p-5 backdrop-blur-2xl shadow-lg hover:shadow-[#B38728]/10 transition-all duration-300 flex flex-col justify-between"
-                >
-                  <div className="space-y-4">
-                    {/* Card Top Row */}
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="relative">
+            <div className="space-y-4">
+              {/* Single column row layout sliced to visibleCount */}
+              <div className="grid grid-cols-1 gap-4">
+                {mentors.slice(0, visibleCount).map((mentor, index) => (
+                  <div 
+                    key={mentor.id || index} 
+                    className="group relative bg-gradient-to-r from-[#1c1c2b]/90 via-[#181826]/90 to-[#141420]/90 hover:from-[#222233] hover:to-[#181826] border border-white/10 hover:border-[#B38728]/50 rounded-2xl p-5 backdrop-blur-2xl shadow-lg transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                  >
+                    <div className="flex items-center gap-4">
+                      {/* Mentor Avatar */}
+                      <div className="relative shrink-0">
                         <div className="w-14 h-14 rounded-2xl overflow-hidden border border-[#B38728]/30 bg-[#252538] flex items-center justify-center font-black text-[#B38728] text-xl shadow-inner group-hover:scale-105 transition-transform duration-300">
                           {mentor.profile_picture ? (
                             <img src={mentor.profile_picture} alt={mentor.name || 'Mentor'} className="w-full h-full object-cover" />
@@ -259,61 +234,57 @@ export default function HomePage() {
                         <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-[#141420] rounded-full" />
                       </div>
 
-                      <span className="text-[10px] px-2.5 py-1 rounded-lg font-bold tracking-wider uppercase bg-[#B38728]/15 text-[#B38728] border border-[#B38728]/30">
-                        {mentor.role || 'MENTOR'}
+                      {/* Mentor Name and Department */}
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-3">
+                          <h3 className="font-bold text-base text-white group-hover:text-[#B38728] transition-colors">
+                            {mentor.name || 'Anonymous Mentor'}
+                          </h3>
+                          <span className="text-[10px] px-2 py-0.5 rounded-lg font-bold tracking-wider uppercase bg-[#B38728]/15 text-[#B38728] border border-[#B38728]/30">
+                            {mentor.role || 'MENTOR'}
+                          </span>
+                        </div>
+                        
+                        <p className="text-xs text-gray-400">
+                          {mentor.department || 'Software Engineering'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Right Side Status & Phone */}
+                    <div className="flex items-center justify-between sm:justify-end gap-6 text-xs text-gray-400 border-t sm:border-t-0 border-white/5 pt-3 sm:pt-0">
+                      <span className="italic text-gray-400">
+                        {mentor.phone || mentor.phone_number ? `📞 ${mentor.phone || mentor.phone_number}` : `"${mentor.activity_status || 'Available'}"`}
+                      </span>
+                      <span className="text-[#B38728] font-bold text-lg group-hover:translate-x-1 transition-transform">
+                        &rarr;
                       </span>
                     </div>
 
-                    {/* Card Info */}
-                    <div className="space-y-1">
-                      <h3 className="font-bold text-base text-white truncate group-hover:text-[#B38728] transition-colors">
-                        {mentor.name || 'Anonymous Mentor'}
-                      </h3>
-                      
-                      <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-medium text-gray-300 bg-white/5 border border-white/10 px-2 py-0.5 rounded-md truncate max-w-[180px]">
-                          {mentor.department || 'Software Engineering'}
-                        </span>
-                      </div>
-                    </div>
                   </div>
+                ))}
+              </div>
 
-                  {/* Card Bottom Meta */}
-                  <div className="mt-5 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-gray-400">
-                    <span className="truncate text-gray-400 italic">
-                      {mentor.phone || mentor.phone_number ? `📞 ${mentor.phone || mentor.phone_number}` : `"${mentor.activity_status || 'Available'}"`}
-                    </span>
-                    <span className="text-[#B38728] opacity-0 group-hover:opacity-100 transition-opacity font-bold ml-2">
-                      &rarr;
-                    </span>
-                  </div>
-
+              {/* CHEVRON ICON BUTTON (USING /chevron.png) */}
+              {visibleCount < mentors.length && (
+                <div className="flex justify-center pt-4">
+                  <button
+                    onClick={handleLoadMore}
+                    aria-label="Load more mentors"
+                    className="group flex items-center justify-center p-2 rounded-full bg-[#171722]/80 hover:bg-[#B38728]/20 border border-[#B38728]/30 hover:border-[#B38728] transition-all duration-300 shadow-lg active:scale-95 cursor-pointer"
+                  >
+                    <Image
+                      src="/chevron.png"
+                      alt="Load more"
+                      width={28}
+                      height={28}
+                      className="object-contain transition-transform duration-300 group-hover:translate-y-1"
+                    />
+                  </button>
                 </div>
-              ))}
+              )}
             </div>
           )}
-        </section>
-
-        {/* SINGLE QUICK NAVIGATION CARD (COMMUNITY POSTS) */}
-        <section>
-          <Link
-            href="/posts"
-            className="group relative block bg-gradient-to-r from-[#171722]/90 via-[#1a1a28]/80 to-[#171722]/90 border border-white/10 hover:border-[#B38728]/50 rounded-3xl p-8 backdrop-blur-xl shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden"
-          >
-            <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-              <div className="space-y-2 max-w-2xl">
-                <h3 className="text-2xl font-black text-white group-hover:text-[#B38728] transition-colors">
-                  Community Posts & Feed
-                </h3>
-                <p className="text-xs sm:text-sm text-gray-400">
-                  Share updates, participate in engineering discussions, and interact with fellow students and mentors in real-time.
-                </p>
-              </div>
-              <span className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#B38728] text-black text-xs font-bold shadow-lg hover:bg-[#c29532] transition-colors shrink-0">
-                Explore Feed &rarr;
-              </span>
-            </div>
-          </Link>
         </section>
 
       </div>
