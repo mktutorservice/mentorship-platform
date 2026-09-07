@@ -20,6 +20,7 @@ export default function PrivateRoomsPage() {
   const [users, setUsers] = useState<Profile[]>([]);
   const [currentUserRole, setCurrentUserRole] = useState<string>('STUDENT');
   const [currentUsername, setCurrentUsername] = useState<string>('User');
+  const [currentUserId, setCurrentUserId] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [activeRoomId, setActiveRoomId] = useState<string | null>(null);
 
@@ -32,7 +33,9 @@ export default function PrivateRoomsPage() {
         return;
       }
 
-      // Get logged in user role & info
+      setCurrentUserId(session.user.id);
+
+      // Fetch logged in user details
       const { data: profile } = await supabase
         .from('profiles')
         .select('*')
@@ -65,7 +68,9 @@ export default function PrivateRoomsPage() {
   }, [router]);
 
   const handleStartCall = async (targetUser: Profile) => {
-    const roomId = `private-${targetUser.id.slice(0, 8)}`;
+    // Deterministic room ID sorting both IDs so both parties always end up in the exact same room
+    const sortedIds = [currentUserId, targetUser.id].sort();
+    const roomId = `private-${sortedIds[0].slice(0, 8)}-${sortedIds[1].slice(0, 8)}`;
 
     if (targetUser.fcm_token) {
       await fetch('/api/notifications', {
@@ -113,45 +118,59 @@ export default function PrivateRoomsPage() {
             {users.map((user) => (
               <div
                 key={user.id}
-                className="bg-[#12131c] border border-amber-500/20 hover:border-amber-500/40 transition rounded-2xl p-6 shadow-xl flex flex-col justify-between"
+                className="bg-[#12131c] border border-amber-500/20 hover:border-amber-500/40 transition rounded-2xl overflow-hidden shadow-xl flex flex-col justify-between"
               >
-                <div className="flex items-start gap-4">
-                 <div className="w-14 h-14 rounded-full border border-amber-500/40 shrink-0 overflow-hidden relative">
-  <img 
-    src={user.avatar_url || '/pp.jpg'} 
-    alt={user.name || 'User'} 
-    className="w-full h-full object-cover" 
-  />
-</div>
-                    <h3 className="text-lg font-semibold text-white">
-                      {user.name || user.username}
-                    </h3>
-                    <p className="text-xs text-amber-400/80">@{user.username || 'user'}</p>
-                    <p className="text-xs text-gray-400 mt-2">
-                      {user.bio || 'Active member in private mentorship tracks.'}
-                    </p>
-                  </div>
+                {/* Cover Banner using pp.jpg */}
+                <div className="relative w-full h-36 border-b border-amber-500/10">
+                  <img
+                    src="/pp.jpg"
+                    alt="Private Session"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-white/5 grid grid-cols-3 gap-2">
-                  <button
-                    onClick={() => handleStartCall(user)}
-                    className="py-2 px-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-semibold rounded-xl text-xs transition text-center shadow-lg shadow-amber-500/10"
-                  >
-                    📞 Connect Call
-                  </button>
-                  <button
-                    onClick={() => alert(`Scheduling session with ${user.name || user.username}...`)}
-                    className="py-2 px-3 bg-white/5 hover:bg-white/10 text-amber-300 border border-amber-500/20 rounded-xl text-xs font-medium transition text-center"
-                  >
-                    📅 Schedule
-                  </button>
-                  <button
-                    onClick={() => alert(`Opening chat with ${user.name || user.username}...`)}
-                    className="py-2 px-3 bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 rounded-xl text-xs font-medium transition text-center"
-                  >
-                    💬 Message
-                  </button>
+                <div className="p-6 flex-1 flex flex-col justify-between">
+                  <div className="flex items-start gap-4">
+                    {/* User Avatar with pp.jpg Fallback */}
+                    <div className="w-14 h-14 rounded-full border border-amber-500/40 shrink-0 overflow-hidden relative bg-amber-500/10">
+                      <img
+                        src={user.avatar_url || '/pp.jpg'}
+                        alt={user.name || user.username}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-semibold text-white">
+                        {user.name || user.username}
+                      </h3>
+                      <p className="text-xs text-amber-400/80">@{user.username || 'user'}</p>
+                      <p className="text-xs text-gray-400 mt-2">
+                        {user.bio || 'Active member in private mentorship tracks.'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t border-white/5 grid grid-cols-3 gap-2">
+                    <button
+                      onClick={() => handleStartCall(user)}
+                      className="py-2 px-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-semibold rounded-xl text-xs transition text-center shadow-lg shadow-amber-500/10"
+                    >
+                      📞 Connect Call
+                    </button>
+                    <button
+                      onClick={() => alert(`Scheduling session with ${user.name || user.username}...`)}
+                      className="py-2 px-3 bg-white/5 hover:bg-white/10 text-amber-300 border border-amber-500/20 rounded-xl text-xs font-medium transition text-center"
+                    >
+                      📅 Schedule
+                    </button>
+                    <button
+                      onClick={() => alert(`Opening chat with ${user.name || user.username}...`)}
+                      className="py-2 px-3 bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 rounded-xl text-xs font-medium transition text-center"
+                    >
+                      💬 Message
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
