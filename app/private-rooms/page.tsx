@@ -116,11 +116,13 @@ export default function PrivateRoomsPage() {
                 className="bg-[#12131c] border border-amber-500/20 hover:border-amber-500/40 transition rounded-2xl p-6 shadow-xl flex flex-col justify-between"
               >
                 <div className="flex items-start gap-4">
-                  <div className="w-14 h-14 rounded-full bg-amber-500/10 border border-amber-500/40 flex items-center justify-center text-xl font-bold text-amber-400 shrink-0">
-                    {(user.name || user.username || 'U')[0].toUpperCase()}
-                  </div>
-
-                  <div>
+                 <div className="w-14 h-14 rounded-full border border-amber-500/40 shrink-0 overflow-hidden relative">
+  <img 
+    src={user.avatar_url || '/pp.jpg'} 
+    alt={user.name || 'User'} 
+    className="w-full h-full object-cover" 
+  />
+</div>
                     <h3 className="text-lg font-semibold text-white">
                       {user.name || user.username}
                     </h3>

@@ -140,22 +140,33 @@ export default function ClassroomsPage() {
           {classrooms.map((room) => (
             <div
               key={room.id}
-              className="bg-[#12131c] p-6 rounded-2xl border border-amber-500/20 hover:border-amber-500/40 transition shadow-xl space-y-4 flex flex-col justify-between"
+              className="bg-[#12131c] rounded-2xl border border-amber-500/20 hover:border-amber-500/40 transition shadow-xl overflow-hidden flex flex-col justify-between"
             >
-              <div className="space-y-3">
-                <span className="text-[10px] uppercase font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                  {room.tag}
-                </span>
-                <h2 className="text-lg font-bold text-white">{room.title}</h2>
-                <p className="text-xs text-gray-400 leading-relaxed">{room.description}</p>
+              {/* Classroom Card Cover Banner */}
+              <div className="relative w-full h-44 overflow-hidden border-b border-amber-500/10">
+                <img
+                  src="/pp.jpg"
+                  alt={room.title}
+                  className="w-full h-full object-cover"
+                />
               </div>
 
-              <button
-                onClick={() => setActiveClassroom(room.id)}
-                className="w-full py-2.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 font-semibold text-xs rounded-xl transition flex items-center justify-center gap-2"
-              >
-                <span>🎥</span> {isMentor ? 'Start Broadcast' : 'Attend Classroom'}
-              </button>
+              <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
+                <div className="space-y-3">
+                  <span className="text-[10px] uppercase font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                    {room.tag}
+                  </span>
+                  <h2 className="text-lg font-bold text-white">{room.title}</h2>
+                  <p className="text-xs text-gray-400 leading-relaxed">{room.description}</p>
+                </div>
+
+                <button
+                  onClick={() => setActiveClassroom(room.id)}
+                  className="w-full py-2.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 font-semibold text-xs rounded-xl transition flex items-center justify-center gap-2"
+                >
+                  <span>🎥</span> {isMentor ? 'Start Broadcast' : 'Attend Classroom'}
+                </button>
+              </div>
             </div>
           ))}
         </div>

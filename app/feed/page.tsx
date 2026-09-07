@@ -193,7 +193,6 @@ export default function HomePage() {
         <section className="space-y-6">
           <div className="border-b border-white/10 pb-4">
             <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-3">
-              {/* Mentorship Icon Box matching design */}
               <div className="w-9 h-9 rounded-xl bg-[#B38728]/15 border border-[#B38728]/30 flex items-center justify-center text-[#B38728] shrink-0">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -214,7 +213,6 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {/* Single column row layout sliced to visibleCount */}
               <div className="grid grid-cols-1 gap-4">
                 {mentors.slice(0, visibleCount).map((mentor, index) => (
                   <div 
@@ -222,14 +220,14 @@ export default function HomePage() {
                     className="group relative bg-gradient-to-r from-[#1c1c2b]/90 via-[#181826]/90 to-[#141420]/90 hover:from-[#222233] hover:to-[#181826] border border-white/10 hover:border-[#B38728]/50 rounded-2xl p-5 backdrop-blur-2xl shadow-lg transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                   >
                     <div className="flex items-center gap-4">
-                      {/* Mentor Avatar */}
+                      {/* Mentor Avatar with /pp.jpg Fallback */}
                       <div className="relative shrink-0">
-                        <div className="w-14 h-14 rounded-2xl overflow-hidden border border-[#B38728]/30 bg-[#252538] flex items-center justify-center font-black text-[#B38728] text-xl shadow-inner group-hover:scale-105 transition-transform duration-300">
-                          {mentor.profile_picture ? (
-                            <img src={mentor.profile_picture} alt={mentor.name || 'Mentor'} className="w-full h-full object-cover" />
-                          ) : (
-                            mentor.name ? mentor.name.charAt(0).toUpperCase() : 'M'
-                          )}
+                        <div className="w-14 h-14 rounded-2xl overflow-hidden border border-[#B38728]/30 bg-[#252538] shrink-0 relative shadow-inner group-hover:scale-105 transition-transform duration-300">
+                          <img
+                            src={mentor.profile_picture || '/pp.jpg'}
+                            alt={mentor.name || 'Mentor'}
+                            className="w-full h-full object-cover"
+                          />
                         </div>
                         <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-[#141420] rounded-full" />
                       </div>
@@ -265,7 +263,7 @@ export default function HomePage() {
                 ))}
               </div>
 
-              {/* CHEVRON ICON BUTTON (USING /chevron.png) */}
+              {/* CHEVRON ICON BUTTON */}
               {visibleCount < mentors.length && (
                 <div className="flex justify-center pt-4">
                   <button

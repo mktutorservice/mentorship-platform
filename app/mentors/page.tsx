@@ -84,13 +84,13 @@ export default function MentorsPage() {
                 className="bg-[#1b1b26] border border-white/10 rounded-2xl p-6 shadow-xl flex flex-col justify-between space-y-4"
               >
                 <div className="flex items-start gap-4">
-                  <div className="w-14 h-14 rounded-full bg-[#8458B3]/20 border border-[#8458B3] flex items-center justify-center text-xl font-bold text-white shrink-0 overflow-hidden">
-                    {mentor.profile_picture ? (
-                      <img src={mentor.profile_picture} alt={mentor.name} className="w-full h-full object-cover" />
-                    ) : (
-                      (mentor.name || mentor.username || 'M')[0].toUpperCase()
-                    )}
-                  </div>
+                  <div className="w-14 h-14 rounded-full bg-[#8458B3]/20 border border-[#8458B3] shrink-0 overflow-hidden relative">
+  <img 
+    src={mentor.profile_picture || '/pp.jpg'} 
+    alt={mentor.name || 'Mentor'} 
+    className="w-full h-full object-cover" 
+  />
+</div>
 
                   <div>
                     <h3 className="text-md font-bold text-white">{mentor.name || mentor.username}</h3>

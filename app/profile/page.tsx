@@ -18,7 +18,7 @@ export default function ProfilePage() {
   const [userStatus, setUserStatus] = useState<string>('Available for tutoring sessions');
   const [feeStatus, setFeeStatus] = useState<string>('Per Hour');
   const [gender, setGender] = useState<string>('Prefer not to say');
-  const [avatarUrl, setAvatarUrl] = useState<string>('/card1.jpg');
+  const [avatarUrl, setAvatarUrl] = useState<string>('/pp.jpg');
   const [isVerified, setIsVerified] = useState<boolean>(false);
   const [age, setAge] = useState<string>('21');
   const [academicInfo, setAcademicInfo] = useState<string>('B.Sc. Software Engineering');
@@ -178,12 +178,12 @@ export default function ProfilePage() {
         {/* Profile Card Header */}
         <div className="bg-[#151622] border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col md:flex-row items-center gap-6">
           <div className="relative">
-            <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-2 border-[#B38728]/50 bg-[#252538] shadow-2xl flex items-center justify-center font-black text-[#B38728] text-3xl">
-              {avatarUrl ? (
-                <img src={avatarUrl} alt={userName} className="w-full h-full object-cover" />
-              ) : (
-                userName.charAt(0)
-              )}
+            <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-2 border-[#B38728]/50 bg-[#252538] shadow-2xl relative">
+              <img 
+                src={avatarUrl || '/pp.jpg'} 
+                alt={userName} 
+                className="w-full h-full object-cover" 
+              />
             </div>
             {isVerified && (
               <span className="absolute -bottom-2 -right-2 bg-[#B38728] text-black w-7 h-7 rounded-full flex items-center justify-center font-black text-xs shadow-lg border-2 border-[#141420]">
@@ -279,7 +279,7 @@ export default function ProfilePage() {
               </button>
             </div>
 
-            {/* TAB CONTENT: SINGLE COLUMN EDIT PROFILE FORM */}
+            {/* TAB CONTENT: EDIT PROFILE FORM */}
             {activeTab === 'profile' && (
               <form onSubmit={handleSaveSettings} className="grid grid-cols-1 gap-5 text-xs animate-fadeIn max-w-2xl mx-auto">
                 <div className="space-y-1">
@@ -545,41 +545,55 @@ export default function ProfilePage() {
           /* REGULAR PROFILE VIEW */
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2">
             
-            {/* CLASSROOMS IMAGE CARD */}
+            {/* CLASSROOMS CARD */}
             <Link href="/classrooms" className="group block">
-              <div className="bg-[#151622] border border-white/10 rounded-3xl p-6 flex flex-col items-center justify-between hover:border-[#B38728]/50 transition duration-300 shadow-2xl">
-                <div className="relative w-full h-60 rounded-2xl overflow-hidden bg-black border border-white/5 shadow-inner">
-                  <Image
-                    src="/classroom0.jfif"
+              <div className="relative bg-[#151622] border border-white/10 rounded-3xl p-4 overflow-hidden hover:border-[#B38728]/60 transition-all duration-300 shadow-2xl hover:shadow-[0_0_25px_rgba(179,135,40,0.25)] hover:-translate-y-1">
+                
+                {/* Full Image Display Area */}
+                <div className="relative w-full h-72 rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1c2e] to-[#0d0e15] border border-white/5 flex items-center justify-center p-4">
+                  <img
+                    src="/pp.jpg"
                     alt="Classrooms"
-                    fill
-                    className="object-cover group-hover:scale-105 transition duration-500 ease-out"
+                    className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500 ease-out"
                   />
+
+                  {/* Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none" />
+
+                  {/* Title Overlay */}
+                  <div className="absolute bottom-3 left-3 right-3 bg-black/50 backdrop-blur-md border border-white/10 rounded-xl py-3 px-4 text-center shadow-lg group-hover:border-[#B38728]/50 transition-all duration-300">
+                    <h3 className="text-sm font-black uppercase tracking-[0.25em] text-white group-hover:text-[#FCF6BA] transition-colors duration-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                      CLASSROOMS
+                    </h3>
+                  </div>
                 </div>
-                <div className="pt-5 text-center">
-                  <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-white group-hover:text-[#FCF6BA] transition">
-                    CLASSROOMS
-                  </h3>
-                </div>
+
               </div>
             </Link>
 
-            {/* PRIVATE HUB IMAGE CARD */}
+            {/* PRIVATE HUB CARD */}
             <Link href="/private-rooms" className="group block">
-              <div className="bg-[#151622] border border-white/10 rounded-3xl p-6 flex flex-col items-center justify-between hover:border-[#B38728]/50 transition duration-300 shadow-2xl">
-                <div className="relative w-full h-60 rounded-2xl overflow-hidden bg-black border border-white/5 shadow-inner">
-                  <Image
-                    src="/privatet.jfif"
+              <div className="relative bg-[#151622] border border-white/10 rounded-3xl p-4 overflow-hidden hover:border-[#B38728]/60 transition-all duration-300 shadow-2xl hover:shadow-[0_0_25px_rgba(179,135,40,0.25)] hover:-translate-y-1">
+                
+                {/* Full Image Display Area */}
+                <div className="relative w-full h-72 rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1c2e] to-[#0d0e15] border border-white/5 flex items-center justify-center p-4">
+                  <img
+                    src="/pp.jpg"
                     alt="Private Hub"
-                    fill
-                    className="object-cover group-hover:scale-105 transition duration-500 ease-out"
+                    className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500 ease-out"
                   />
+
+                  {/* Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none" />
+
+                  {/* Title Overlay */}
+                  <div className="absolute bottom-3 left-3 right-3 bg-black/50 backdrop-blur-md border border-white/10 rounded-xl py-3 px-4 text-center shadow-lg group-hover:border-[#B38728]/50 transition-all duration-300">
+                    <h3 className="text-sm font-black uppercase tracking-[0.25em] text-white group-hover:text-[#FCF6BA] transition-colors duration-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                      PRIVATE HUB
+                    </h3>
+                  </div>
                 </div>
-                <div className="pt-5 text-center">
-                  <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-white group-hover:text-[#FCF6BA] transition">
-                    PRIVATE HUB
-                  </h3>
-                </div>
+
               </div>
             </Link>
 
@@ -588,7 +602,7 @@ export default function ProfilePage() {
 
       </div>
 
-      {/* Contacts Modal */}
+      {/* CONTACTS MODAL */}
       {showContactsModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
           <div className="bg-[#171722] border border-white/10 text-white p-6 rounded-3xl max-w-sm w-full shadow-2xl space-y-4">
@@ -624,7 +638,7 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* Add Post Modal */}
+      {/* ADD POST MODAL */}
       {showPostModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
           <div className="bg-[#171722] border border-white/10 text-white p-6 rounded-3xl max-w-md w-full shadow-2xl space-y-4">
