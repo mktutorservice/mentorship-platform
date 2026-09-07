@@ -13,7 +13,7 @@
     "@daily-co/daily-react": "^0.26.0",
     "@livekit/components-react": "^2.9.24",
     "@livekit/components-styles": "^1.2.0",
-    "@supabase/ssr": "^0.12.5",
+    "@supabase/ssr": "^0.12.6",
     "@supabase/supabase-js": "^2.112.4",
     "firebase": "^12.18.0",
     "firebase-admin": "^14.3.0",

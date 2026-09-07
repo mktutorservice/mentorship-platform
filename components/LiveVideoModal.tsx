@@ -6,7 +6,6 @@ import {
   VideoConference,
   RoomAudioRenderer,
 } from '@livekit/components-react';
-import '@livekit/components-styles';
 
 interface LiveVideoModalProps {
   roomId: string;
@@ -16,18 +15,50 @@ interface LiveVideoModalProps {
 
 export default function LiveVideoModal({ roomId, username, onClose }: LiveVideoModalProps) {
   const [token, setToken] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(`/api/livekit-token?room=${roomId}&username=${username}`);
+        const res = await fetch(
+          `/api/livekit-token?room=${encodeURIComponent(roomId)}&username=${encodeURIComponent(username)}`
+        );
+
         const data = await res.json();
-        setToken(data.token);
-      } catch (e) {
-        console.error('Failed to fetch token', e);
+        console.log('API Response payload:', data); // Log raw output for inspection
+
+        if (!res.ok) {
+          throw new Error(data.error || `Server returned status ${res.status}`);
+        }
+
+        if (data.token && typeof data.token === 'string') {
+          setToken(data.token);
+        } else {
+          throw new Error(data.error || 'Token is missing or invalid in server response');
+        }
+      } catch (err: any) {
+        console.error('Error fetching LiveKit token:', err);
+        setError(err.message || 'Unable to connect to live stream');
       }
     })();
   }, [roomId, username]);
+
+  if (error) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0d0e15]/90 backdrop-blur-md p-4">
+        <div className="bg-[#12131c] border border-red-500/30 p-6 rounded-2xl max-w-sm w-full text-center space-y-4 shadow-2xl">
+          <p className="text-sm font-semibold text-red-400">Connection Failed</p>
+          <p className="text-xs text-gray-400">{error}</p>
+          <button
+            onClick={onClose}
+            className="w-full py-2 bg-red-600/20 text-red-300 hover:bg-red-600/30 border border-red-500/30 rounded-xl text-xs font-semibold transition"
+          >
+            Close Window
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (!token) {
     return (

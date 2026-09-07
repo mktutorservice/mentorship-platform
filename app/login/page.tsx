@@ -74,10 +74,13 @@ export default function LoginPage() {
     setGoogleLoading(true);
     setErrorMsg(null);
 
+    // Dynamic origin keeps you on localhost:3000 in local dev
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+       redirectTo: `${origin}/callback`,
         queryParams: {
           access_type: 'offline',
           prompt: 'consent',

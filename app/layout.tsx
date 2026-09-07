@@ -1,4 +1,5 @@
 import './globals.css';
+import '@livekit/components-styles';
 import Navbar from '@/components/Navbar';
 
 export const metadata = {
