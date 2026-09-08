@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useTheme } from 'next-themes';
 
 type ToolType = 'crop' | 'filter' | 'trim' | 'text' | 'music' | 'rotate';
 
@@ -38,6 +39,8 @@ const FONTS = [
 
 export default function EditVideoPage() {
   const router = useRouter();
+  const { resolvedTheme, theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
   // Video context states
   const [videoUrl, setVideoUrl] = useState<string>('');
@@ -79,6 +82,7 @@ export default function EditVideoPage() {
   const timelineTrackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setMounted(true);
     const data = localStorage.getItem('editedVideoData');
     if (data) {
       try {
@@ -256,41 +260,40 @@ export default function EditVideoPage() {
   };
 
   const handleSaveChanges = () => {
-  const existing = localStorage.getItem('editedVideoData');
-  let parsed: Record<string, any> = {};
-  if (existing) {
-    try {
-      parsed = JSON.parse(existing);
-    } catch (e) {
-      console.error(e);
+    const existing = localStorage.getItem('editedVideoData');
+    let parsed: Record<string, any> = {};
+    if (existing) {
+      try {
+        parsed = JSON.parse(existing);
+      } catch (e) {
+        console.error(e);
+      }
     }
-  }
 
-  const updatedData = {
-    ...parsed,
-    // Preserve or update the original video URL
-    videoUrl: parsed.videoUrl || videoUrl,
-    filter: selectedFilter,
-    aspectRatio: selectedRatio,
-    rotation: rotationAngle,
-    trim: { start: trimStart, end: trimEnd },
-    overlayText: overlayText
-      ? {
-          text: overlayText,
-          color: textColor,
-          font: selectedFont,
-          position: textPosition,
-          size: textSize,
-        }
-      : null,
-    audioTrack: audioName || null,
-    isMuted,
-    updatedAt: Date.now(), // Unique timestamp trigger
+    const updatedData = {
+      ...parsed,
+      videoUrl: parsed.videoUrl || videoUrl,
+      filter: selectedFilter,
+      aspectRatio: selectedRatio,
+      rotation: rotationAngle,
+      trim: { start: trimStart, end: trimEnd },
+      overlayText: overlayText
+        ? {
+            text: overlayText,
+            color: textColor,
+            font: selectedFont,
+            position: textPosition,
+            size: textSize,
+          }
+        : null,
+      audioTrack: audioName || null,
+      isMuted,
+      updatedAt: Date.now(),
+    };
+
+    localStorage.setItem('editedVideoData', JSON.stringify(updatedData));
+    router.push('/posts/create-video');
   };
-
-  localStorage.setItem('editedVideoData', JSON.stringify(updatedData));
-  router.push('/posts/create-video');
-};
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -298,22 +301,42 @@ export default function EditVideoPage() {
     return `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
+  const activeTheme = theme === 'system' ? resolvedTheme : theme;
+  const isDark = mounted ? activeTheme === 'dark' : true;
+
   const trimLeftPercent = duration > 0 ? (trimStart / duration) * 100 : 0;
   const trimRightPercent = duration > 0 ? 100 - (trimEnd / duration) * 100 : 0;
 
+  if (!mounted) return null;
+
   return (
-    <div className="min-h-screen bg-[#08080c] text-white flex flex-col items-center justify-between p-4 md:p-6 select-none">
-      
+    <div
+      className={`min-h-screen flex flex-col items-center justify-between p-4 md:p-6 select-none transition-colors duration-300 ${
+        isDark ? 'bg-[#08080c] text-white' : 'bg-slate-50 text-slate-900'
+      }`}
+    >
       {/* Top Navigation Bar */}
-      <header className="w-full max-w-4xl bg-[#12131f]/80 backdrop-blur-md border border-white/10 rounded-full px-6 py-3 flex items-center justify-between shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
+      <header
+        className={`w-full max-w-4xl backdrop-blur-md border rounded-full px-6 py-3 flex items-center justify-between shadow-xl transition-colors duration-300 ${
+          isDark
+            ? 'bg-[#12131f]/80 border-white/10'
+            : 'bg-white/80 border-slate-200'
+        }`}
+      >
         <button
           onClick={() => router.back()}
-          className="text-xs font-bold text-gray-400 hover:text-white transition flex items-center gap-1 cursor-pointer"
+          className={`text-xs font-bold transition flex items-center gap-1 cursor-pointer ${
+            isDark ? 'text-gray-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'
+          }`}
         >
           ✕ Cancel
         </button>
 
-        <div className="flex items-center gap-1 sm:gap-2 bg-black/40 p-1.5 rounded-full border border-white/5">
+        <div
+          className={`flex items-center gap-1 sm:gap-2 p-1.5 rounded-full border transition-colors ${
+            isDark ? 'bg-black/40 border-white/5' : 'bg-slate-100 border-slate-200'
+          }`}
+        >
           {[
             { id: 'crop', icon: '/expand.png', label: 'Crop' },
             { id: 'filter', icon: '/funnel.png', label: 'Filter' },
@@ -330,8 +353,10 @@ export default function EditVideoPage() {
               }}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition cursor-pointer ${
                 activeTool === item.id
-                  ? 'bg-gradient-to-r from-[#B38728]/30 to-[#FCF6BA]/20 border border-[#FCF6BA]/50 text-[#FCF6BA]'
-                  : 'hover:bg-white/5 text-gray-400 hover:text-white'
+                  ? 'bg-gradient-to-r from-[#B38728]/30 to-[#FCF6BA]/20 border border-[#B38728] text-[#B38728]'
+                  : isDark
+                  ? 'hover:bg-white/5 text-gray-400 hover:text-white'
+                  : 'hover:bg-slate-200 text-slate-600 hover:text-slate-900'
               }`}
             >
               <Image src={item.icon} alt={item.label} width={16} height={16} className="object-contain w-4 h-4" unoptimized />
@@ -342,7 +367,7 @@ export default function EditVideoPage() {
 
         <button
           onClick={handleSaveChanges}
-          className="flex items-center gap-2 px-5 py-2 bg-[#B38728] hover:bg-[#FCF6BA] text-black font-bold text-xs rounded-full transition shadow-[0_0_12px_rgba(253,246,186,0.4)] cursor-pointer"
+          className="flex items-center gap-2 px-5 py-2 bg-[#B38728] hover:bg-[#FCF6BA] text-black font-bold text-xs rounded-full transition shadow-md cursor-pointer"
         >
           <Image src="/check.png" alt="Save" width={16} height={16} className="object-contain w-4 h-4 bg-transparent" unoptimized />
           <span>Save</span>
@@ -355,7 +380,9 @@ export default function EditVideoPage() {
           ref={canvasContainerRef}
           onMouseMove={handleTextDrag}
           onMouseUp={() => setIsDragging(false)}
-          className="relative max-h-[48vh] rounded-2xl overflow-hidden border border-[#B38728]/30 shadow-2xl bg-black flex items-center justify-center transition-all duration-300"
+          className={`relative max-h-[48vh] rounded-2xl overflow-hidden border shadow-2xl bg-black flex items-center justify-center transition-all duration-300 ${
+            isDark ? 'border-[#B38728]/30' : 'border-slate-300'
+          }`}
           style={{
             aspectRatio: selectedRatio === 'custom' ? 'auto' : selectedRatio.replace(':', '/'),
           }}
@@ -397,13 +424,22 @@ export default function EditVideoPage() {
       </main>
 
       {/* Multi-Track Timeline Area */}
-      <footer className="w-full max-w-4xl bg-[#12131f]/90 backdrop-blur-lg border border-white/10 rounded-3xl p-5 shadow-2xl space-y-4">
-        
-        <div className="flex items-center justify-between text-xs text-gray-400 font-mono border-b border-white/10 pb-2">
+      <footer
+        className={`w-full max-w-4xl backdrop-blur-lg border rounded-3xl p-5 shadow-2xl space-y-4 transition-colors duration-300 ${
+          isDark
+            ? 'bg-[#12131f]/90 border-white/10'
+            : 'bg-white border-slate-200'
+        }`}
+      >
+        <div
+          className={`flex items-center justify-between text-xs font-mono border-b pb-2 ${
+            isDark ? 'text-gray-400 border-white/10' : 'text-slate-500 border-slate-200'
+          }`}
+        >
           <span>{formatTime(currentTime)} / {formatTime(duration)}</span>
           <div className="flex items-center gap-3">
-            {isDecodingAudio && <span className="text-[10px] text-cyan-400 animate-pulse">Decoding Audio...</span>}
-            {isExtracting && <span className="text-[10px] text-[#FCF6BA] animate-pulse">Extracting Frames...</span>}
+            {isDecodingAudio && <span className="text-[10px] text-cyan-500 animate-pulse">Decoding Audio...</span>}
+            {isExtracting && <span className="text-[10px] text-[#B38728] animate-pulse">Extracting Frames...</span>}
           </div>
         </div>
 
@@ -416,7 +452,9 @@ export default function EditVideoPage() {
               handleSeekOrTrim(e);
             }
           }}
-          className="relative w-full bg-[#0a0a10] border border-white/10 rounded-2xl p-3 overflow-hidden space-y-2 cursor-pointer select-none"
+          className={`relative w-full border rounded-2xl p-3 overflow-hidden space-y-2 cursor-pointer select-none transition-colors ${
+            isDark ? 'bg-[#0a0a10] border-white/10' : 'bg-slate-100 border-slate-200'
+          }`}
         >
           {/* Interactive Trim Overlay */}
           <div
@@ -463,7 +501,11 @@ export default function EditVideoPage() {
           </div>
 
           {/* Filmstrip Track */}
-          <div className="relative h-14 bg-white/5 rounded-xl border border-white/10 overflow-hidden flex items-center pointer-events-none">
+          <div
+            className={`relative h-14 rounded-xl border overflow-hidden flex items-center pointer-events-none ${
+              isDark ? 'bg-white/5 border-white/10' : 'bg-slate-200 border-slate-300'
+            }`}
+          >
             {videoThumbnails.length > 0 ? (
               <div className="grid grid-cols-8 w-full h-full gap-0.5 p-0.5">
                 {videoThumbnails.map((thumb, idx) => (
@@ -475,13 +517,13 @@ export default function EditVideoPage() {
                 ))}
               </div>
             ) : (
-              <div className="w-full text-center text-[10px] text-gray-500 font-mono">
+              <div className={`w-full text-center text-[10px] font-mono ${isDark ? 'text-gray-500' : 'text-slate-400'}`}>
                 {isExtracting ? 'Generating Filmstrip Frames...' : 'Load Video to Render Filmstrip'}
               </div>
             )}
           </div>
 
-          {/* AUDIO TRACK (Appears only when Music button is selected) */}
+          {/* AUDIO TRACK */}
           {activeTool === 'music' && (
             <div className="relative h-11 bg-teal-950/40 border border-teal-500/30 rounded-xl px-3 flex items-center justify-between overflow-hidden pointer-events-none transition-all">
               <span className="text-[10px] font-bold text-cyan-300 z-10 flex items-center gap-1 bg-black/40 px-2 py-0.5 rounded-md">
@@ -506,7 +548,7 @@ export default function EditVideoPage() {
             </div>
           )}
 
-          {/* TEXT TRACK (Appears only when Text tool is active or when overlayText is typed) */}
+          {/* TEXT TRACK */}
           {(activeTool === 'text' || overlayText) && (
             <div className="h-8 bg-purple-900/40 border border-purple-500/30 rounded-lg px-3 flex items-center text-[10px] text-purple-200 pointer-events-none transition-all">
               T {overlayText || 'Add text overlay...'}
@@ -517,7 +559,7 @@ export default function EditVideoPage() {
         {/* Dynamic Tool Configurations */}
         {activeTool === 'crop' && (
           <div className="space-y-2">
-            <span className="text-xs font-bold text-[#FCF6BA] block">Aspect Ratio</span>
+            <span className="text-xs font-bold text-[#B38728] block">Aspect Ratio</span>
             <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
               {CROP_RATIOS.map((ratio) => (
                 <button
@@ -525,8 +567,10 @@ export default function EditVideoPage() {
                   onClick={() => setSelectedRatio(ratio.value)}
                   className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer border ${
                     selectedRatio === ratio.value
-                      ? 'bg-[#B38728]/30 border-[#FCF6BA] text-[#FCF6BA]'
-                      : 'bg-white/5 border-white/10 text-gray-400 hover:text-white'
+                      ? 'bg-[#B38728]/30 border-[#B38728] text-[#B38728]'
+                      : isDark
+                      ? 'bg-white/5 border-white/10 text-gray-400 hover:text-white'
+                      : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   {ratio.label}
@@ -538,7 +582,7 @@ export default function EditVideoPage() {
 
         {activeTool === 'filter' && (
           <div className="space-y-2">
-            <span className="text-xs font-bold text-[#FCF6BA] block">Modern Filters</span>
+            <span className="text-xs font-bold text-[#B38728] block">Modern Filters</span>
             <div className="flex items-center gap-3 overflow-x-auto pb-1">
               {FILTERS.map((f) => (
                 <button
@@ -546,8 +590,10 @@ export default function EditVideoPage() {
                   onClick={() => setSelectedFilter(f.filter)}
                   className={`flex flex-col items-center space-y-1.5 p-2 rounded-xl border transition cursor-pointer min-w-[75px] ${
                     selectedFilter === f.filter
-                      ? 'border-[#FCF6BA] bg-[#B38728]/20'
-                      : 'border-white/10 bg-white/5 hover:bg-white/10'
+                      ? 'border-[#B38728] bg-[#B38728]/20'
+                      : isDark
+                      ? 'border-white/10 bg-white/5 hover:bg-white/10 text-gray-300'
+                      : 'border-slate-200 bg-slate-100 hover:bg-slate-200 text-slate-700'
                   }`}
                 >
                   <div
@@ -558,7 +604,7 @@ export default function EditVideoPage() {
                       backgroundColor: '#222',
                     }}
                   />
-                  <span className="text-[10px] font-medium text-gray-300">{f.name}</span>
+                  <span className="text-[10px] font-medium">{f.name}</span>
                 </button>
               ))}
             </div>
@@ -567,13 +613,17 @@ export default function EditVideoPage() {
 
         {activeTool === 'trim' && (
           <div className="space-y-3">
-            <div className="flex justify-between items-center text-xs text-gray-300">
-              <span className="font-bold text-[#FCF6BA]">Trim Duration</span>
-              <span className="bg-black/60 px-3 py-1 rounded-full border border-white/10 text-[11px]">
+            <div className="flex justify-between items-center text-xs">
+              <span className="font-bold text-[#B38728]">Trim Duration</span>
+              <span
+                className={`px-3 py-1 rounded-full border text-[11px] ${
+                  isDark ? 'bg-black/60 border-white/10 text-gray-300' : 'bg-slate-100 border-slate-200 text-slate-700'
+                }`}
+              >
                 ⏱️ {trimStart.toFixed(1)}s - {trimEnd.toFixed(1)}s (Length: {(trimEnd - trimStart).toFixed(1)}s)
               </span>
             </div>
-            <p className="text-[10px] text-gray-400">
+            <p className={`text-[10px] ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>
               Drag the yellow vertical handles directly on the timeline track to crop start and end points.
             </p>
           </div>
@@ -587,16 +637,22 @@ export default function EditVideoPage() {
                 value={overlayText}
                 onChange={(e) => setOverlayText(e.target.value)}
                 placeholder="Type overlay text (drag on video to move)..."
-                className="bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#FCF6BA]"
+                className={`border rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-[#B38728] ${
+                  isDark
+                    ? 'bg-black/50 border-white/10 text-white placeholder-gray-500'
+                    : 'bg-slate-100 border-slate-200 text-slate-900 placeholder-slate-400'
+                }`}
               />
 
               <select
                 value={selectedFont}
                 onChange={(e) => setSelectedFont(e.target.value)}
-                className="bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#FCF6BA]"
+                className={`border rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#B38728] ${
+                  isDark ? 'bg-[#12131f] border-white/10 text-white' : 'bg-slate-100 border-slate-200 text-slate-900'
+                }`}
               >
                 {FONTS.map((font) => (
-                  <option key={font.class} value={font.class} className="bg-[#12131f]">
+                  <option key={font.class} value={font.class} className={isDark ? 'bg-[#12131f]' : 'bg-white'}>
                     {font.name}
                   </option>
                 ))}
@@ -605,7 +661,7 @@ export default function EditVideoPage() {
 
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <span className="text-[11px] text-gray-400">Color:</span>
+                <span className={`text-[11px] ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>Color:</span>
                 <input
                   type="color"
                   value={textColor}
@@ -615,14 +671,14 @@ export default function EditVideoPage() {
               </div>
 
               <div className="flex items-center gap-2 flex-1">
-                <span className="text-[11px] text-gray-400">Size:</span>
+                <span className={`text-[11px] ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>Size:</span>
                 <input
                   type="range"
                   min={14}
                   max={60}
                   value={textSize}
                   onChange={(e) => setTextSize(Number(e.target.value))}
-                  className="w-full accent-[#FCF6BA]"
+                  className="w-full accent-[#B38728]"
                 />
               </div>
             </div>
@@ -631,7 +687,7 @@ export default function EditVideoPage() {
 
         {activeTool === 'music' && (
           <div className="space-y-3">
-            <span className="text-xs font-bold text-[#FCF6BA] block">Audio & Mute Settings</span>
+            <span className="text-xs font-bold text-[#B38728] block">Audio & Mute Settings</span>
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <input
@@ -643,22 +699,27 @@ export default function EditVideoPage() {
                 />
                 <label
                   htmlFor="audio-upload"
-                  className="px-4 py-2 bg-white/5 border border-white/10 hover:border-[#FCF6BA] rounded-xl text-xs text-[#FCF6BA] cursor-pointer transition"
+                  className={`px-4 py-2 border rounded-xl text-xs cursor-pointer transition ${
+                    isDark
+                      ? 'bg-white/5 border-white/10 text-[#FCF6BA] hover:border-[#FCF6BA]'
+                      : 'bg-slate-100 border-slate-200 text-slate-800 hover:border-[#B38728]'
+                  }`}
                 >
                   Choose Audio File
                 </label>
-                <span className="text-xs text-gray-400 truncate max-w-[200px]">
+                <span className={`text-xs truncate max-w-[200px] ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>
                   {audioName || 'No custom audio file chosen'}
                 </span>
               </div>
 
-              {/* Mute Video Button */}
               <button
                 onClick={() => setIsMuted((prev) => !prev)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer border ${
                   isMuted
                     ? 'bg-red-500/20 border-red-500 text-red-400'
-                    : 'bg-white/5 border-white/10 text-gray-300 hover:text-white'
+                    : isDark
+                    ? 'bg-white/5 border-white/10 text-gray-300 hover:text-white'
+                    : 'bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-900'
                 }`}
               >
                 <Image

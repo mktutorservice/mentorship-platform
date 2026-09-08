@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useTheme } from 'next-themes';
 import { supabase } from '@/lib/supabaseClient';
 
 interface AuthorProfile {
@@ -33,6 +34,9 @@ interface Post {
 
 export default function PostsPage() {
   const router = useRouter();
+  const { resolvedTheme, theme } = useTheme();
+  const [mounted, setMounted] = useState<boolean>(false);
+
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   
@@ -49,6 +53,10 @@ export default function PostsPage() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const fetchPosts = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -247,6 +255,9 @@ export default function PostsPage() {
     return contentMatches || authorNameMatches || usernameMatches;
   });
 
+  const activeTheme = theme === 'system' ? resolvedTheme : theme;
+  const isDark = mounted ? activeTheme === 'dark' : true;
+
   const renderPostAttachments = (post: Post) => {
     if (!post.media_url) return null;
 
@@ -276,7 +287,11 @@ export default function PostsPage() {
                 href={item.url} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 p-3 bg-[#0f0f17] border border-[#B38728]/30 rounded-xl text-xs text-[#FCF6BA] hover:border-[#FCF6BA] transition group truncate"
+                className={`flex items-center gap-3 p-3 border rounded-xl text-xs transition group truncate ${
+                  isDark
+                    ? 'bg-[#0f0f17] border-[#B38728]/30 text-[#FCF6BA] hover:border-[#FCF6BA]'
+                    : 'bg-slate-100 border-slate-300 text-amber-800 hover:border-[#B38728]'
+                }`}
               >
                 <span>📄</span>
                 <span className="truncate group-hover:underline">{item.name || 'Attached PDF / Document'}</span>
@@ -288,16 +303,22 @@ export default function PostsPage() {
     );
   };
 
+  if (!mounted) return null;
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0b0c10] flex items-center justify-center text-[#B38728] font-medium animate-pulse">
+      <div className={`min-h-screen flex items-center justify-center font-medium animate-pulse transition-colors duration-300 ${
+        isDark ? 'bg-[#0b0c10] text-[#B38728]' : 'bg-slate-50 text-amber-700'
+      }`}>
         Loading posts...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0b0c10] text-white px-4 py-8">
+    <div className={`min-h-screen px-4 py-8 transition-colors duration-300 ${
+      isDark ? 'bg-[#0b0c10] text-white' : 'bg-slate-50 text-slate-900'
+    }`}>
       <input 
         type="file" 
         ref={fileInputRef} 
@@ -315,15 +336,21 @@ export default function PostsPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search posts, context, or members..."
-            className="w-full bg-[#151622] border border-[#B38728]/30 focus:border-[#FCF6BA] rounded-2xl py-3 pl-11 pr-10 text-xs text-white placeholder-gray-500 focus:outline-none focus:shadow-[0_0_15px_rgba(179,135,40,0.3)] transition"
+            className={`w-full border rounded-2xl py-3 pl-11 pr-10 text-xs focus:outline-none transition ${
+              isDark
+                ? 'bg-[#151622] border-[#B38728]/30 focus:border-[#FCF6BA] text-white placeholder-gray-500 focus:shadow-[0_0_15px_rgba(179,135,40,0.3)]'
+                : 'bg-white border-slate-300 focus:border-[#B38728] text-slate-900 placeholder-slate-400 focus:shadow-sm'
+            }`}
           />
-          <svg className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 fill-gray-400" viewBox="0 0 24 24">
+          <svg className={`w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 ${isDark ? 'fill-gray-400' : 'fill-slate-400'}`} viewBox="0 0 24 24">
             <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
           </svg>
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white text-xs font-bold"
+              className={`absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold ${
+                isDark ? 'text-gray-400 hover:text-white' : 'text-slate-400 hover:text-slate-800'
+              }`}
             >
               ✕
             </button>
@@ -331,16 +358,26 @@ export default function PostsPage() {
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/10 pb-4">
+        <div className={`flex items-center justify-between border-b pb-4 transition-colors ${
+          isDark ? 'border-white/10' : 'border-slate-200'
+        }`}>
           <div>
-            <h1 className="text-2xl font-black text-white tracking-wide">Community Posts</h1>
-            <p className="text-xs text-gray-400 mt-1">Share photos, videos, books, descriptions, & live classrooms</p>
+            <h1 className={`text-2xl font-black tracking-wide ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              Community Posts
+            </h1>
+            <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>
+              Share photos, videos, books, descriptions, & live classrooms
+            </p>
           </div>
 
           {/* Plus Icon Action Button */}
           <button
             onClick={() => setIsShareOpen(!isShareOpen)}
-            className="p-2 rounded-full bg-[#151622]/80 border border-[#B38728]/40 shadow-[0_0_15px_rgba(179,135,40,0.2)] hover:scale-105 hover:border-[#FCF6BA] transition flex items-center justify-center cursor-pointer"
+            className={`p-2 rounded-full border shadow-md hover:scale-105 transition flex items-center justify-center cursor-pointer ${
+              isDark
+                ? 'bg-[#151622]/80 border-[#B38728]/40 shadow-[0_0_15px_rgba(179,135,40,0.2)] hover:border-[#FCF6BA]'
+                : 'bg-white border-slate-300 hover:border-[#B38728]'
+            }`}
             title={isShareOpen ? "Close Post Composer" : "Create Post"}
           >
             <Image 
@@ -356,13 +393,21 @@ export default function PostsPage() {
 
         {/* Collapsible Create Post Box */}
         {isShareOpen && (
-          <form onSubmit={handleCreatePost} className="bg-[#151622] border border-[#B38728]/40 rounded-3xl p-5 shadow-[0_0_25px_rgba(0,0,0,0.8)] space-y-4">
+          <form onSubmit={handleCreatePost} className={`border rounded-3xl p-5 shadow-2xl space-y-4 transition-colors ${
+            isDark 
+              ? 'bg-[#151622] border-[#B38728]/40 shadow-[0_0_25px_rgba(0,0,0,0.8)]' 
+              : 'bg-white border-slate-200 shadow-slate-200'
+          }`}>
             <textarea
               value={postContent}
               onChange={(e) => setPostContent(e.target.value)}
               placeholder="What would you like to share? (Write descriptions, notes, or post context...)"
               rows={3}
-              className="w-full bg-[#0f0f17] border border-[#B38728]/30 rounded-2xl p-4 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#FCF6BA] focus:shadow-[0_0_12px_rgba(179,135,40,0.4)] transition resize-none"
+              className={`w-full border rounded-2xl p-4 text-xs focus:outline-none focus:border-[#FCF6BA] focus:shadow-[0_0_12px_rgba(179,135,40,0.4)] transition resize-none ${
+                isDark
+                  ? 'bg-[#0f0f17] border-[#B38728]/30 text-white placeholder-gray-500'
+                  : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'
+              }`}
             />
 
             {/* Live Classroom Link Option */}
@@ -373,7 +418,11 @@ export default function PostsPage() {
                   placeholder="Paste Live Classroom Link (e.g., Google Meet, Zoom, Jitsi)"
                   value={classroomUrl}
                   onChange={(e) => setClassroomUrl(e.target.value)}
-                  className="w-full bg-[#0f0f17] border border-[#B38728]/40 rounded-xl p-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#FCF6BA]"
+                  className={`w-full border rounded-xl p-3 text-xs focus:outline-none focus:border-[#FCF6BA] ${
+                    isDark
+                      ? 'bg-[#0f0f17] border-[#B38728]/40 text-white placeholder-gray-500'
+                      : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'
+                  }`}
                 />
               </div>
             )}
@@ -382,12 +431,14 @@ export default function PostsPage() {
             {selectedFiles.length > 0 && (
               <div className="space-y-2">
                 {selectedFiles.map((file, idx) => (
-                  <div key={idx} className="flex items-center justify-between bg-[#0f0f17] border border-white/10 px-3 py-2 rounded-xl text-xs text-gray-300">
+                  <div key={idx} className={`flex items-center justify-between border px-3 py-2 rounded-xl text-xs ${
+                    isDark ? 'bg-[#0f0f17] border-white/10 text-gray-300' : 'bg-slate-100 border-slate-200 text-slate-700'
+                  }`}>
                     <span className="truncate">📎 {file.name}</span>
                     <button 
                       type="button" 
                       onClick={() => removeFile(idx)}
-                      className="text-gray-400 hover:text-white font-bold ml-2"
+                      className={`font-bold ml-2 ${isDark ? 'text-gray-400 hover:text-white' : 'text-slate-400 hover:text-slate-800'}`}
                     >
                       ✕
                     </button>
@@ -397,12 +448,18 @@ export default function PostsPage() {
             )}
 
             {/* Actions Toolbar */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-white/5">
+            <div className={`flex flex-wrap items-center justify-between gap-3 pt-2 border-t ${
+              isDark ? 'border-white/5' : 'border-slate-100'
+            }`}>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="px-3.5 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs text-gray-300 font-medium transition cursor-pointer"
+                  className={`px-3.5 py-2 border rounded-xl text-xs font-medium transition cursor-pointer ${
+                    isDark
+                      ? 'bg-white/5 hover:bg-white/10 border-white/10 text-gray-300'
+                      : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700'
+                  }`}
                 >
                   📁 Attach Media/PDF
                 </button>
@@ -411,8 +468,10 @@ export default function PostsPage() {
                   onClick={() => setIsClassroom(!isClassroom)}
                   className={`px-3.5 py-2 border rounded-xl text-xs font-medium transition cursor-pointer ${
                     isClassroom 
-                      ? 'bg-[#B38728]/20 border-[#B38728] text-[#FCF6BA]' 
-                      : 'bg-white/5 hover:bg-white/10 border-white/10 text-gray-300'
+                      ? 'bg-[#B38728]/20 border-[#B38728] text-[#B38728]' 
+                      : isDark
+                      ? 'bg-white/5 hover:bg-white/10 border-white/10 text-gray-300'
+                      : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700'
                   }`}
                 >
                   🎥 Live Classroom
@@ -432,7 +491,9 @@ export default function PostsPage() {
 
         {/* Feed List */}
         {filteredPosts.length === 0 ? (
-          <div className="bg-[#151622] p-10 rounded-3xl border border-white/10 text-center text-gray-400 text-xs">
+          <div className={`p-10 rounded-3xl border text-center text-xs ${
+            isDark ? 'bg-[#151622] border-white/10 text-gray-400' : 'bg-white border-slate-200 text-slate-500'
+          }`}>
             {searchQuery ? `No posts matched "${searchQuery}"` : 'No posts found. Be the first to publish a post!'}
           </div>
         ) : (
@@ -442,34 +503,48 @@ export default function PostsPage() {
               const initial = authorName ? authorName[0].toUpperCase() : 'C';
 
               return (
-                <div key={post.id} className="bg-[#151622] border border-white/10 rounded-3xl p-6 shadow-xl space-y-4">
+                <div key={post.id} className={`border rounded-3xl p-6 shadow-xl space-y-4 transition-colors ${
+                  isDark ? 'bg-[#151622] border-white/10' : 'bg-white border-slate-200'
+                }`}>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#B38728]/20 border border-[#B38728] flex items-center justify-center font-bold text-[#FCF6BA] text-sm shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-[#B38728]/20 border border-[#B38728] flex items-center justify-center font-bold text-[#B38728] text-sm shrink-0">
                       {initial}
                     </div>
                     <div>
-                      <h3 className="font-bold text-white text-xs">{authorName}</h3>
-                      <p className="text-[10px] text-gray-400">
+                      <h3 className={`font-bold text-xs ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                        {authorName}
+                      </h3>
+                      <p className={`text-[10px] ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>
                         {new Date(post.created_at).toLocaleDateString()} at {new Date(post.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
                   </div>
 
-                  <p className="text-xs text-gray-200 leading-relaxed whitespace-pre-wrap">
+                  <p className={`text-xs leading-relaxed whitespace-pre-wrap ${
+                    isDark ? 'text-gray-200' : 'text-slate-700'
+                  }`}>
                     {post.content}
                   </p>
 
                   {renderPostAttachments(post)}
 
-                  <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                  <div className={`flex items-center justify-between pt-3 border-t ${
+                    isDark ? 'border-white/5' : 'border-slate-100'
+                  }`}>
                     <button
                       onClick={() => handleToggleLike(post)}
                       className={`flex items-center gap-1.5 text-xs font-semibold transition ${
-                        post.user_has_liked ? 'text-pink-500' : 'text-gray-400 hover:text-white'
+                        post.user_has_liked
+                          ? 'text-pink-500'
+                          : isDark
+                          ? 'text-gray-400 hover:text-white'
+                          : 'text-slate-500 hover:text-slate-900'
                       }`}
                     >
                       {post.user_has_liked ? '❤️ Liked' : '🤍 Like'}
-                      <span className="bg-white/5 px-2 py-0.5 rounded-full text-[10px]">
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] ${
+                        isDark ? 'bg-white/5' : 'bg-slate-100'
+                      }`}>
                         {post.likes_count || 0}
                       </span>
                     </button>

@@ -1,5 +1,6 @@
 import Navbar from '@/components/Navbar';
 import AddPostModal from '@/components/AddPostModal';
+import { ThemeProvider } from 'next-themes';
 import '@/app/globals.css';
 
 export default function RootLayout({
@@ -8,11 +9,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="bg-[#0b0c10] min-h-screen text-white antialiased">
-        <Navbar />
-        <main>{children}</main>
-        <AddPostModal />
+    <html lang="en" suppressHydrationWarning>
+      <body className="bg-slate-50 text-slate-900 dark:bg-[#0b0c10] dark:text-white min-h-screen antialiased transition-colors duration-300">
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+          <Navbar />
+          <main>{children}</main>
+          <AddPostModal />
+        </ThemeProvider>
       </body>
     </html>
   );

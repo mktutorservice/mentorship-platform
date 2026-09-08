@@ -82,7 +82,7 @@ export default function HomePage() {
   if (!mounted) return null;
 
   return (
-    <main className="relative min-h-screen bg-[#0f0f17] text-white selection:bg-[#B38728] selection:text-white overflow-hidden pb-16">
+    <main className="relative min-h-screen bg-slate-100 dark:bg-[#0f0f17] text-slate-900 dark:text-white transition-colors duration-300 selection:bg-[#B38728] selection:text-white overflow-hidden pb-16">
       
       {/* BACKGROUND LAYER */}
       <div className="absolute inset-0 z-0">
@@ -91,9 +91,9 @@ export default function HomePage() {
           alt="Dashboard Background"
           fill
           priority
-          className="object-cover object-center opacity-30 mix-blend-screen transition-all duration-700"
+          className="object-cover object-center opacity-10 dark:opacity-30 mix-blend-multiply dark:mix-blend-screen transition-all duration-700"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0f0f17]/80 via-[#0f0f17]/60 to-[#0f0f17]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-100/80 dark:from-[#0f0f17]/80 via-slate-100/60 dark:via-[#0f0f17]/60 to-slate-100 dark:to-[#0f0f17] transition-colors duration-300" />
       </div>
 
       {/* FLOATING NAVIGATION BUTTON */}
@@ -112,18 +112,18 @@ export default function HomePage() {
         <div className="fixed inset-0 z-50 flex">
           <div 
             onClick={() => setIsMenuOpen(false)}
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm transition-opacity"
           />
 
-          <aside className="relative w-80 max-w-[80vw] bg-[#171722] border-r border-white/10 p-6 flex flex-col justify-between z-10 shadow-2xl transition-transform duration-300">
+          <aside className="relative w-80 max-w-[80vw] bg-white dark:bg-[#171722] border-r border-slate-200 dark:border-white/10 p-6 flex flex-col justify-between z-10 shadow-2xl transition-colors duration-300">
             <div>
-              <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
-                <span className="text-sm font-black uppercase tracking-widest text-white">
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-4 mb-6">
+                <span className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white">
                   Navigation<span className="text-[#B38728]">.</span>
                 </span>
                 <button 
                   onClick={() => setIsMenuOpen(false)}
-                  className="text-gray-400 hover:text-white p-1"
+                  className="text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white p-1"
                 >
                   ✕
                 </button>
@@ -141,7 +141,7 @@ export default function HomePage() {
                 <Link
                   href="/create-profile"
                   onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 hover:text-white text-sm font-medium transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white text-sm font-medium transition-colors"
                 >
                   <span>👤</span> Create Profile
                 </Link>
@@ -149,7 +149,7 @@ export default function HomePage() {
                 <Link
                   href="/mentors"
                   onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 hover:text-white text-sm font-medium transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white text-sm font-medium transition-colors"
                 >
                   <span>👥</span> Mentors & Sessions
                 </Link>
@@ -157,7 +157,7 @@ export default function HomePage() {
                 <Link
                   href="/posts"
                   onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 hover:text-white text-sm font-medium transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white text-sm font-medium transition-colors"
                 >
                   <span>💬</span> Community Feed
                 </Link>
@@ -165,15 +165,15 @@ export default function HomePage() {
                 <Link
                   href="/settings"
                   onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 hover:text-white text-sm font-medium transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white text-sm font-medium transition-colors"
                 >
                   <span>⚙️</span> Settings
                 </Link>
               </nav>
             </div>
 
-            <div className="border-t border-white/10 pt-4 text-xs text-gray-500">
-              Logged in as <span className="text-white font-semibold">{userName}</span>
+            <div className="border-t border-slate-200 dark:border-white/10 pt-4 text-xs text-slate-500 dark:text-gray-500">
+              Logged in as <span className="text-slate-900 dark:text-white font-semibold">{userName}</span>
             </div>
           </aside>
         </div>
@@ -183,16 +183,16 @@ export default function HomePage() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 space-y-10">
         
         {/* Welcome Section */}
-        <section className="bg-[#171722]/80 border border-white/10 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl space-y-2">
-          <h1 className="text-2xl md:text-4xl font-black tracking-tight text-white">
+        <section className="bg-white/80 dark:bg-[#171722]/80 border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-xl dark:shadow-2xl space-y-2 transition-colors duration-300">
+          <h1 className="text-2xl md:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
             Hello, <span className="text-[#B38728]">{userName}</span>
           </h1>
         </section>
 
         {/* AVAILABLE MENTORS SINGLE-COLUMN LIST */}
         <section className="space-y-6">
-          <div className="border-b border-white/10 pb-4">
-            <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-3">
+          <div className="border-b border-slate-200 dark:border-white/10 pb-4">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-[#B38728]/15 border border-[#B38728]/30 flex items-center justify-center text-[#B38728] shrink-0">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -206,9 +206,9 @@ export default function HomePage() {
           </div>
 
           {loadingMentors ? (
-            <div className="text-center py-12 text-xs text-gray-500 animate-pulse">Loading mentors catalog...</div>
+            <div className="text-center py-12 text-xs text-slate-500 dark:text-gray-500 animate-pulse">Loading mentors catalog...</div>
           ) : mentors.length === 0 ? (
-            <div className="text-center py-12 text-xs text-gray-400 bg-[#171722]/40 rounded-3xl border border-white/5">
+            <div className="text-center py-12 text-xs text-slate-500 dark:text-gray-400 bg-white/40 dark:bg-[#171722]/40 rounded-3xl border border-slate-200 dark:border-white/5">
               No mentor profiles found in database.
             </div>
           ) : (
@@ -217,25 +217,25 @@ export default function HomePage() {
                 {mentors.slice(0, visibleCount).map((mentor, index) => (
                   <div 
                     key={mentor.id || index} 
-                    className="group relative bg-gradient-to-r from-[#1c1c2b]/90 via-[#181826]/90 to-[#141420]/90 hover:from-[#222233] hover:to-[#181826] border border-white/10 hover:border-[#B38728]/50 rounded-2xl p-5 backdrop-blur-2xl shadow-lg transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                    className="group relative bg-white dark:bg-gradient-to-r dark:from-[#1c1c2b]/90 dark:via-[#181826]/90 dark:to-[#141420]/90 hover:bg-slate-50 dark:hover:from-[#222233] dark:hover:to-[#181826] border border-slate-200 dark:border-white/10 hover:border-[#B38728]/50 rounded-2xl p-5 backdrop-blur-2xl shadow-md dark:shadow-lg transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                   >
                     <div className="flex items-center gap-4">
                       {/* Mentor Avatar with /pp.jpg Fallback */}
                       <div className="relative shrink-0">
-                        <div className="w-14 h-14 rounded-2xl overflow-hidden border border-[#B38728]/30 bg-[#252538] shrink-0 relative shadow-inner group-hover:scale-105 transition-transform duration-300">
+                        <div className="w-14 h-14 rounded-2xl overflow-hidden border border-[#B38728]/30 bg-slate-100 dark:bg-[#252538] shrink-0 relative shadow-inner group-hover:scale-105 transition-transform duration-300">
                           <img
                             src={mentor.profile_picture || '/pp.jpg'}
                             alt={mentor.name || 'Mentor'}
                             className="w-full h-full object-cover"
                           />
                         </div>
-                        <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-[#141420] rounded-full" />
+                        <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white dark:border-[#141420] rounded-full" />
                       </div>
 
                       {/* Mentor Name and Department */}
                       <div className="space-y-1">
                         <div className="flex items-center gap-3">
-                          <h3 className="font-bold text-base text-white group-hover:text-[#B38728] transition-colors">
+                          <h3 className="font-bold text-base text-slate-900 dark:text-white group-hover:text-[#B38728] transition-colors">
                             {mentor.name || 'Anonymous Mentor'}
                           </h3>
                           <span className="text-[10px] px-2 py-0.5 rounded-lg font-bold tracking-wider uppercase bg-[#B38728]/15 text-[#B38728] border border-[#B38728]/30">
@@ -243,15 +243,15 @@ export default function HomePage() {
                           </span>
                         </div>
                         
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-slate-500 dark:text-gray-400">
                           {mentor.department || 'Software Engineering'}
                         </p>
                       </div>
                     </div>
 
                     {/* Right Side Status & Phone */}
-                    <div className="flex items-center justify-between sm:justify-end gap-6 text-xs text-gray-400 border-t sm:border-t-0 border-white/5 pt-3 sm:pt-0">
-                      <span className="italic text-gray-400">
+                    <div className="flex items-center justify-between sm:justify-end gap-6 text-xs text-slate-500 dark:text-gray-400 border-t sm:border-t-0 border-slate-100 dark:border-white/5 pt-3 sm:pt-0">
+                      <span className="italic text-slate-600 dark:text-gray-400">
                         {mentor.phone || mentor.phone_number ? `📞 ${mentor.phone || mentor.phone_number}` : `"${mentor.activity_status || 'Available'}"`}
                       </span>
                       <span className="text-[#B38728] font-bold text-lg group-hover:translate-x-1 transition-transform">
@@ -269,14 +269,14 @@ export default function HomePage() {
                   <button
                     onClick={handleLoadMore}
                     aria-label="Load more mentors"
-                    className="group flex items-center justify-center p-2 rounded-full bg-[#171722]/80 hover:bg-[#B38728]/20 border border-[#B38728]/30 hover:border-[#B38728] transition-all duration-300 shadow-lg active:scale-95 cursor-pointer"
+                    className="group flex items-center justify-center p-2 rounded-full bg-white dark:bg-[#171722]/80 hover:bg-[#B38728]/20 border border-[#B38728]/30 hover:border-[#B38728] transition-all duration-300 shadow-lg active:scale-95 cursor-pointer"
                   >
                     <Image
                       src="/chevron.png"
                       alt="Load more"
                       width={28}
                       height={28}
-                      className="object-contain transition-transform duration-300 group-hover:translate-y-1"
+                      className="object-contain transition-transform duration-300 group-hover:translate-y-1 dark:brightness-100 brightness-0"
                     />
                   </button>
                 </div>

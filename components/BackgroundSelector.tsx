@@ -30,20 +30,19 @@ export default function BackgroundSelector({ isOpen, onClose, onSelectBackground
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
-      <div className="bg-[#171722] text-white p-6 rounded-3xl max-w-lg w-full border border-white/10 shadow-2xl space-y-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 dark:bg-black/80 backdrop-blur-md p-4">
+      <div className="bg-white dark:bg-[#171722] text-slate-900 dark:text-white p-6 rounded-3xl max-w-lg w-full border border-slate-200 dark:border-white/10 shadow-2xl space-y-6 transition-colors duration-300">
         
-        <div className="flex items-center justify-between border-b border-white/10 pb-3">
-          <h2 className="text-xl font-bold gold-text">Choose Background</h2>
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
+          <h2 className="text-xl font-bold text-amber-700 dark:text-[#FCF6BA]">Choose Background</h2>
           <button 
             onClick={onClose}
-            className="text-gray-400 hover:text-white font-bold text-lg cursor-pointer"
+            className="text-slate-400 hover:text-slate-800 dark:text-gray-400 dark:hover:text-white font-bold text-lg cursor-pointer"
           >
             ✕
           </button>
         </div>
 
-        {/* Preset Background Options */}
         <div className="grid grid-cols-2 gap-3">
           {PRESET_BACKGROUNDS.map((bg) => (
             <button
@@ -52,23 +51,22 @@ export default function BackgroundSelector({ isOpen, onClose, onSelectBackground
                 onSelectBackground(bg.url);
                 onClose();
               }}
-              className="group relative h-24 rounded-2xl overflow-hidden border-2 border-transparent hover:border-[#B38728] transition shadow-md cursor-pointer"
+              className="group relative h-24 rounded-2xl overflow-hidden border-2 border-slate-200 dark:border-transparent hover:border-[#B38728] transition shadow-md cursor-pointer"
             >
               <img 
                 src={bg.url} 
                 alt={bg.name} 
                 className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
               />
-              <span className="absolute inset-0 bg-black/50 flex items-center justify-center text-xs font-semibold">
+              <span className="absolute inset-0 bg-black/40 flex items-center justify-center text-xs font-semibold text-white">
                 {bg.name}
               </span>
             </button>
           ))}
         </div>
 
-        {/* Custom Image URL Option */}
-        <form onSubmit={handleCustomSubmit} className="space-y-3 pt-2 border-t border-white/10">
-          <label className="block text-xs font-medium text-gray-300">
+        <form onSubmit={handleCustomSubmit} className="space-y-3 pt-2 border-t border-slate-200 dark:border-white/10">
+          <label className="block text-xs font-medium text-slate-600 dark:text-gray-300">
             Or enter custom Image URL:
           </label>
           <div className="flex gap-2">
@@ -77,7 +75,7 @@ export default function BackgroundSelector({ isOpen, onClose, onSelectBackground
               placeholder="https://example.com/image.jpg"
               value={customUrl}
               onChange={(e) => setCustomUrl(e.target.value)}
-              className="flex-1 px-4 py-2 text-xs rounded-xl bg-[#0f0f17] text-white border border-white/10 focus:outline-none focus:border-[#B38728]"
+              className="flex-1 px-4 py-2 text-xs rounded-xl bg-slate-100 dark:bg-[#0f0f17] text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 focus:outline-none focus:border-[#B38728]"
             />
             <button
               type="submit"

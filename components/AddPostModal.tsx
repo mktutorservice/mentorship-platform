@@ -17,14 +17,12 @@ export default function AddPostModal() {
   const [content, setContent] = useState('');
   const [activeType, setActiveType] = useState<'video' | 'photo' | 'file' | 'location' | null>(null);
 
-  // Attachment States
   const [selectedPhotos, setSelectedPhotos] = useState<File[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [locationText, setLocationText] = useState('');
 
   const [submitting, setSubmitting] = useState(false);
 
-  // File Input Refs
   const photoInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -47,7 +45,6 @@ export default function AddPostModal() {
     setActiveType(type);
 
     if (type === 'video') {
-      // Close modal and redirect directly to dedicated video post creation page
       closeModal();
       router.push('/posts/create-video');
     } else if (type === 'photo') {
@@ -103,7 +100,6 @@ export default function AddPostModal() {
     try {
       const uploadedAttachments: PostAttachment[] = [];
 
-      // Upload photos (Max 7)
       for (const photo of selectedPhotos) {
         const photoExt = photo.name.split('.').pop();
         const photoName = `${user.id}/photo_${Date.now()}_${Math.random().toString(36).substring(7)}.${photoExt}`;
@@ -124,7 +120,6 @@ export default function AddPostModal() {
         }
       }
 
-      // Upload documents
       for (const file of selectedFiles) {
         const fileExt = file.name.split('.').pop();
         const fileName = `${user.id}/file_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
@@ -178,136 +173,129 @@ export default function AddPostModal() {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#0b0c10] text-white flex flex-col p-6 md:p-12 animate-fadeIn overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-slate-50/95 dark:bg-[#0b0c10]/95 backdrop-blur-md text-slate-900 dark:text-white flex flex-col p-6 md:p-12 animate-fadeIn overflow-y-auto transition-colors duration-300">
       <input type="file" ref={photoInputRef} multiple accept="image/*" className="hidden" onChange={handlePhotosSelect} />
       <input type="file" ref={fileInputRef} multiple accept=".pdf,.doc,.docx,.txt,.zip" className="hidden" onChange={handleFilesSelect} />
 
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-white/10 pb-6 mb-8 max-w-4xl mx-auto w-full">
-        <h2 className="text-2xl font-black text-white tracking-wide">Create New Post</h2>
+      <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-6 mb-8 max-w-4xl mx-auto w-full">
+        <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-wide">Create New Post</h2>
         <button
           onClick={closeModal}
-          className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white font-bold transition text-lg cursor-pointer"
+          className="w-10 h-10 rounded-full bg-slate-200 dark:bg-white/5 hover:bg-slate-300 dark:hover:bg-white/10 border border-slate-300 dark:border-white/10 flex items-center justify-center text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white font-bold transition text-lg cursor-pointer"
         >
           ✕
         </button>
       </div>
 
       <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col space-y-6">
-        {/* Choices Header */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <button
             type="button"
             onClick={() => handleSelectType('video')}
-            className="flex items-center justify-center gap-3 p-4 rounded-2xl border bg-[#151622] border-white/10 hover:border-[#B38728]/50 transition cursor-pointer"
+            className="flex items-center justify-center gap-3 p-4 rounded-2xl border bg-white dark:bg-[#151622] border-slate-200 dark:border-white/10 hover:border-[#B38728] transition cursor-pointer shadow-sm"
           >
             <Image src="/educational-video.png" alt="Video" width={24} height={24} className="object-contain w-6 h-6" unoptimized />
-            <span className="text-xs font-bold text-gray-200">Video</span>
+            <span className="text-xs font-bold text-slate-700 dark:text-gray-200">Video</span>
           </button>
 
           <button
             type="button"
             onClick={() => handleSelectType('photo')}
-            className={`flex items-center justify-center gap-3 p-4 rounded-2xl border transition cursor-pointer ${
+            className={`flex items-center justify-center gap-3 p-4 rounded-2xl border transition cursor-pointer shadow-sm ${
               activeType === 'photo'
-                ? 'bg-[#B38728]/20 border-[#B38728] shadow-[0_0_15px_rgba(179,135,40,0.3)]'
-                : 'bg-[#151622] border-white/10 hover:border-[#B38728]/50'
+                ? 'bg-amber-500/10 dark:bg-[#B38728]/20 border-[#B38728] shadow-[0_0_15px_rgba(179,135,40,0.2)]'
+                : 'bg-white dark:bg-[#151622] border-slate-200 dark:border-white/10 hover:border-[#B38728]'
             }`}
           >
             <Image src="/image.png" alt="Photo" width={24} height={24} className="object-contain w-6 h-6" unoptimized />
-            <span className="text-xs font-bold text-gray-200">Photo</span>
+            <span className="text-xs font-bold text-slate-700 dark:text-gray-200">Photo</span>
           </button>
 
           <button
             type="button"
             onClick={() => handleSelectType('file')}
-            className={`flex items-center justify-center gap-3 p-4 rounded-2xl border transition cursor-pointer ${
+            className={`flex items-center justify-center gap-3 p-4 rounded-2xl border transition cursor-pointer shadow-sm ${
               activeType === 'file'
-                ? 'bg-[#B38728]/20 border-[#B38728] shadow-[0_0_15px_rgba(179,135,40,0.3)]'
-                : 'bg-[#151622] border-white/10 hover:border-[#B38728]/50'
+                ? 'bg-amber-500/10 dark:bg-[#B38728]/20 border-[#B38728] shadow-[0_0_15px_rgba(179,135,40,0.2)]'
+                : 'bg-white dark:bg-[#151622] border-slate-200 dark:border-white/10 hover:border-[#B38728]'
             }`}
           >
             <Image src="/folder.png" alt="File" width={24} height={24} className="object-contain w-6 h-6" unoptimized />
-            <span className="text-xs font-bold text-gray-200">File</span>
+            <span className="text-xs font-bold text-slate-700 dark:text-gray-200">File</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveType('location')}
-            className={`flex items-center justify-center gap-3 p-4 rounded-2xl border transition cursor-pointer ${
+            className={`flex items-center justify-center gap-3 p-4 rounded-2xl border transition cursor-pointer shadow-sm ${
               activeType === 'location'
-                ? 'bg-[#B38728]/20 border-[#B38728] shadow-[0_0_15px_rgba(179,135,40,0.3)]'
-                : 'bg-[#151622] border-white/10 hover:border-[#B38728]/50'
+                ? 'bg-amber-500/10 dark:bg-[#B38728]/20 border-[#B38728] shadow-[0_0_15px_rgba(179,135,40,0.2)]'
+                : 'bg-white dark:bg-[#151622] border-slate-200 dark:border-white/10 hover:border-[#B38728]'
             }`}
           >
             <Image src="/location.png" alt="Location" width={24} height={24} className="object-contain w-6 h-6" unoptimized />
-            <span className="text-xs font-bold text-gray-200">Location</span>
+            <span className="text-xs font-bold text-slate-700 dark:text-gray-200">Location</span>
           </button>
         </div>
 
-        {/* Location Input Field */}
         {activeType === 'location' && (
-          <div className="bg-[#151622] border border-[#B38728]/40 p-4 rounded-2xl space-y-2">
-            <label className="text-xs font-bold text-[#FCF6BA]">Add Location</label>
+          <div className="bg-white dark:bg-[#151622] border border-slate-200 dark:border-[#B38728]/40 p-4 rounded-2xl space-y-2 shadow-sm">
+            <label className="text-xs font-bold text-amber-700 dark:text-[#FCF6BA]">Add Location</label>
             <input
               type="text"
               placeholder="e.g., Campus Library, Engineering Block, Online..."
               value={locationText}
               onChange={(e) => setLocationText(e.target.value)}
-              className="w-full bg-[#0f0f17] border border-white/10 rounded-xl p-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#FCF6BA]"
+              className="w-full bg-slate-100 dark:bg-[#0f0f17] border border-slate-200 dark:border-white/10 rounded-xl p-3 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#B38728]"
             />
           </div>
         )}
 
-        {/* Text Area Body */}
         <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-between space-y-6">
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Share an update, notes, or post context..."
             rows={8}
-            className="w-full flex-1 bg-[#151622] border border-[#B38728]/30 rounded-3xl p-6 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FCF6BA] focus:shadow-[0_0_20px_rgba(179,135,40,0.2)] transition resize-none"
+            className="w-full flex-1 bg-white dark:bg-[#151622] border border-slate-200 dark:border-[#B38728]/30 rounded-3xl p-6 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#B38728] dark:focus:border-[#FCF6BA] shadow-sm transition resize-none"
           />
 
-          {/* Photos Badge List */}
           {selectedPhotos.length > 0 && (
-            <div className="bg-[#151622] p-4 rounded-2xl border border-white/10 space-y-2">
+            <div className="bg-white dark:bg-[#151622] p-4 rounded-2xl border border-slate-200 dark:border-white/10 space-y-2 shadow-sm">
               <div className="flex justify-between items-center">
-                <span className="text-xs text-gray-400 font-bold">Attached Photos ({selectedPhotos.length}/7):</span>
+                <span className="text-xs text-slate-500 dark:text-gray-400 font-bold">Attached Photos ({selectedPhotos.length}/7):</span>
                 {selectedPhotos.length < 7 && (
-                  <button type="button" onClick={() => photoInputRef.current?.click()} className="text-[11px] text-[#FCF6BA] hover:underline">
+                  <button type="button" onClick={() => photoInputRef.current?.click()} className="text-[11px] text-amber-600 dark:text-[#FCF6BA] hover:underline font-semibold">
                     + Add More
                   </button>
                 )}
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {selectedPhotos.map((file, idx) => (
-                  <div key={idx} className="flex items-center justify-between bg-[#0f0f17] border border-white/10 p-2 rounded-xl text-xs text-gray-300">
+                  <div key={idx} className="flex items-center justify-between bg-slate-100 dark:bg-[#0f0f17] border border-slate-200 dark:border-white/10 p-2 rounded-xl text-xs text-slate-700 dark:text-gray-300">
                     <span className="truncate">📷 {file.name}</span>
-                    <button type="button" onClick={() => removePhoto(idx)} className="text-gray-400 hover:text-white font-bold ml-1">✕</button>
+                    <button type="button" onClick={() => removePhoto(idx)} className="text-slate-400 hover:text-slate-700 dark:hover:text-white font-bold ml-1">✕</button>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Files Badge List */}
           {selectedFiles.length > 0 && (
-            <div className="bg-[#151622] p-4 rounded-2xl border border-white/10 space-y-2">
-              <span className="text-xs text-gray-400 font-bold block">Attached Documents:</span>
+            <div className="bg-white dark:bg-[#151622] p-4 rounded-2xl border border-slate-200 dark:border-white/10 space-y-2 shadow-sm">
+              <span className="text-xs text-slate-500 dark:text-gray-400 font-bold block">Attached Documents:</span>
               <div className="space-y-1.5 max-h-32 overflow-y-auto">
                 {selectedFiles.map((file, idx) => (
-                  <div key={idx} className="flex items-center justify-between bg-[#0f0f17] border border-white/10 px-3 py-2 rounded-xl text-xs text-gray-300">
+                  <div key={idx} className="flex items-center justify-between bg-slate-100 dark:bg-[#0f0f17] border border-slate-200 dark:border-white/10 px-3 py-2 rounded-xl text-xs text-slate-700 dark:text-gray-300">
                     <span className="truncate">📎 {file.name}</span>
-                    <button type="button" onClick={() => removeFile(idx)} className="text-gray-400 hover:text-white font-bold ml-2">✕</button>
+                    <button type="button" onClick={() => removeFile(idx)} className="text-slate-400 hover:text-slate-700 dark:hover:text-white font-bold ml-2">✕</button>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Footer - Send Button without Background */}
-          <div className="flex justify-end pt-4 border-t border-white/10">
+          <div className="flex justify-end pt-4 border-t border-slate-200 dark:border-white/10">
             <button
               type="submit"
               disabled={submitting || (!content.trim() && selectedPhotos.length === 0 && selectedFiles.length === 0 && !locationText.trim())}

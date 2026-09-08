@@ -549,18 +549,13 @@ export default function ProfilePage() {
             <Link href="/classrooms" className="group block">
               <div className="relative bg-[#151622] border border-white/10 rounded-3xl p-4 overflow-hidden hover:border-[#B38728]/60 transition-all duration-300 shadow-2xl hover:shadow-[0_0_25px_rgba(179,135,40,0.25)] hover:-translate-y-1">
                 
-                {/* Full Image Display Area */}
                 <div className="relative w-full h-72 rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1c2e] to-[#0d0e15] border border-white/5 flex items-center justify-center p-4">
                   <img
                     src="/pp.jpg"
                     alt="Classrooms"
                     className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500 ease-out"
                   />
-
-                  {/* Gradient Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none" />
-
-                  {/* Title Overlay */}
                   <div className="absolute bottom-3 left-3 right-3 bg-black/50 backdrop-blur-md border border-white/10 rounded-xl py-3 px-4 text-center shadow-lg group-hover:border-[#B38728]/50 transition-all duration-300">
                     <h3 className="text-sm font-black uppercase tracking-[0.25em] text-white group-hover:text-[#FCF6BA] transition-colors duration-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
                       CLASSROOMS
@@ -575,18 +570,13 @@ export default function ProfilePage() {
             <Link href="/private-rooms" className="group block">
               <div className="relative bg-[#151622] border border-white/10 rounded-3xl p-4 overflow-hidden hover:border-[#B38728]/60 transition-all duration-300 shadow-2xl hover:shadow-[0_0_25px_rgba(179,135,40,0.25)] hover:-translate-y-1">
                 
-                {/* Full Image Display Area */}
                 <div className="relative w-full h-72 rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1c2e] to-[#0d0e15] border border-white/5 flex items-center justify-center p-4">
                   <img
                     src="/pp.jpg"
                     alt="Private Hub"
                     className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500 ease-out"
                   />
-
-                  {/* Gradient Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none" />
-
-                  {/* Title Overlay */}
                   <div className="absolute bottom-3 left-3 right-3 bg-black/50 backdrop-blur-md border border-white/10 rounded-xl py-3 px-4 text-center shadow-lg group-hover:border-[#B38728]/50 transition-all duration-300">
                     <h3 className="text-sm font-black uppercase tracking-[0.25em] text-white group-hover:text-[#FCF6BA] transition-colors duration-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
                       PRIVATE HUB

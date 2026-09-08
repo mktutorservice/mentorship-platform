@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useTheme } from 'next-themes';
 import { supabase } from '@/lib/supabaseClient';
 
 const VIDEO_CATEGORIES = [
@@ -25,6 +26,8 @@ const VIDEO_CATEGORIES = [
 
 export default function CreateVideoPostPage() {
   const router = useRouter();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -42,6 +45,10 @@ export default function CreateVideoPostPage() {
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     const editedData = localStorage.getItem('editedVideoData');
     if (editedData) {
       try {
@@ -57,31 +64,32 @@ export default function CreateVideoPostPage() {
     }
   }, []);
 
+  const isBrightMode = mounted && resolvedTheme === 'light';
+
   const handleVideoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-  if (e.target.files && e.target.files[0]) {
-    const file = e.target.files[0];
-    setSelectedVideo(file);
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedVideo(file);
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64Url = event.target?.result as string;
-      setVideoPreviewUrl(base64Url);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64Url = event.target?.result as string;
+        setVideoPreviewUrl(base64Url);
 
-      // Save persistent Base64 string to localStorage
-      localStorage.setItem(
-        'editedVideoData',
-        JSON.stringify({
-          videoUrl: base64Url,
-          fileName: file.name,
-          title,
-          description,
-          videoCategory,
-        })
-      );
-    };
-    reader.readAsDataURL(file);
-  }
-};
+        localStorage.setItem(
+          'editedVideoData',
+          JSON.stringify({
+            videoUrl: base64Url,
+            fileName: file.name,
+            title,
+            description,
+            videoCategory,
+          })
+        );
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleThumbnailSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -255,22 +263,62 @@ export default function CreateVideoPostPage() {
   const isPublishable = (selectedVideo || videoPreviewUrl) && title.trim() && description.trim() && !isProcessing;
 
   return (
-    <div className="min-h-screen bg-[#0b0c10] text-white p-6 md:p-12 flex flex-col justify-center items-center">
+    <div
+      className={`min-h-screen p-6 md:p-12 flex flex-col justify-center items-center transition-colors duration-300 ${
+        isBrightMode ? 'bg-gray-100 text-gray-900' : 'bg-[#0b0c10] text-white'
+      }`}
+    >
       <input type="file" ref={videoInputRef} accept="video/*" className="hidden" onChange={handleVideoSelect} />
       <input type="file" ref={thumbnailInputRef} accept="image/*" className="hidden" onChange={handleThumbnailSelect} />
 
-      <div className="max-w-xl w-full bg-[#151622] border border-[#B38728]/40 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
-        <div className="flex items-center justify-between border-b border-white/10 pb-4">
-          <h1 className="text-xl font-black text-white">Create Video Post</h1>
-          <button onClick={() => router.back()} className="text-gray-400 hover:text-white text-xs font-bold transition">
+      <div
+        className={`max-w-xl w-full border rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 transition-colors duration-300 ${
+          isBrightMode
+            ? 'bg-white border-amber-400/60 shadow-gray-300'
+            : 'bg-[#151622] border-[#B38728]/40'
+        }`}
+      >
+        <div
+          className={`flex items-center justify-between border-b pb-4 ${
+            isBrightMode ? 'border-gray-200' : 'border-white/10'
+          }`}
+        >
+          <h1 className={`text-xl font-black ${isBrightMode ? 'text-gray-900' : 'text-white'}`}>
+            Create Video Post
+          </h1>
+
+          <button
+            onClick={() => router.back()}
+            className={`text-xs font-bold transition ${
+              isBrightMode ? 'text-gray-500 hover:text-gray-900' : 'text-gray-400 hover:text-white'
+            }`}
+          >
             ← Back
           </button>
         </div>
 
-        {/* Video Preview with Canvas Filters Applied */}
+        {/* Video Upload & Preview Area */}
         <div className="flex flex-col items-center justify-center space-y-3">
-          {videoPreviewUrl ? (
-            <div className="relative w-full max-w-xs h-80 rounded-2xl overflow-hidden border border-[#B38728]/40 bg-black group flex items-center justify-center">
+          {/* Always-Visible Upload Action Trigger */}
+          <button
+            type="button"
+            onClick={() => videoInputRef.current?.click()}
+            className={`w-full max-w-xs py-2.5 px-4 rounded-xl border border-dashed text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
+              isBrightMode
+                ? 'border-amber-400 bg-amber-50 text-amber-900 hover:bg-amber-100'
+                : 'border-[#B38728]/60 bg-[#0f0f17] text-[#FCF6BA] hover:border-[#FCF6BA]'
+            }`}
+          >
+            <Image src="/upload.png" alt="Upload" width={18} height={18} className="object-contain" unoptimized />
+            {videoPreviewUrl ? 'Replace Selected Video' : 'Select Video File'}
+          </button>
+
+          {videoPreviewUrl && (
+            <div
+              className={`relative w-full max-w-xs h-80 rounded-2xl overflow-hidden border group flex items-center justify-center ${
+                isBrightMode ? 'border-amber-400/60 bg-gray-900' : 'border-[#B38728]/40 bg-black'
+              }`}
+            >
               <video
                 src={videoPreviewUrl}
                 muted={editedSettings?.isMuted}
@@ -286,7 +334,6 @@ export default function CreateVideoPostPage() {
                 controls={!isProcessing}
               />
 
-              {/* Saved Text Overlay Display */}
               {editedSettings?.overlayText?.text && (
                 <div
                   className={`absolute pointer-events-none px-2 py-1 rounded bg-black/40 border border-dashed border-white/40 ${
@@ -304,7 +351,6 @@ export default function CreateVideoPostPage() {
                 </div>
               )}
 
-              {/* Upload Progress Overlay */}
               {isProcessing && (
                 <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center space-y-2 z-20">
                   <div className="text-3xl font-black text-[#FCF6BA] tracking-widest animate-pulse">
@@ -320,7 +366,6 @@ export default function CreateVideoPostPage() {
                 </div>
               )}
 
-              {/* Edit Icon Overlay Trigger */}
               {!isProcessing && (
                 <button
                   type="button"
@@ -332,28 +377,13 @@ export default function CreateVideoPostPage() {
                 </button>
               )}
             </div>
-          ) : (
-            <div
-              onClick={() => videoInputRef.current?.click()}
-              className="w-full max-w-xs h-64 border-2 border-dashed border-[#B38728]/50 hover:border-[#FCF6BA] rounded-2xl flex flex-col items-center justify-center bg-[#0f0f17] cursor-pointer transition space-y-3 p-4"
-            >
-              <Image src="/upload.png" alt="Upload Video" width={42} height={42} className="object-contain w-10 h-10" unoptimized />
-              <span className="text-xs font-bold text-gray-300">Click to select video</span>
-            </div>
           )}
 
           {(selectedVideo || editedSettings?.fileName) && (
             <div className="flex items-center gap-3">
-              <span className="text-xs text-gray-400 font-medium truncate max-w-[200px]">
+              <span className={`text-xs font-medium truncate max-w-[200px] ${isBrightMode ? 'text-gray-600' : 'text-gray-400'}`}>
                 {selectedVideo?.name || editedSettings?.fileName || 'Selected Video'}
               </span>
-              <button
-                type="button"
-                onClick={() => videoInputRef.current?.click()}
-                className="text-[11px] text-[#FCF6BA] hover:underline font-bold"
-              >
-                Change
-              </button>
             </div>
           )}
         </div>
@@ -361,15 +391,27 @@ export default function CreateVideoPostPage() {
         {/* Form Inputs */}
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Thumbnail Selection */}
-          <div className="flex items-center justify-between bg-[#0f0f17] p-4 rounded-2xl border border-white/10">
+          <div
+            className={`flex items-center justify-between p-4 rounded-2xl border ${
+              isBrightMode ? 'bg-gray-50 border-gray-200' : 'bg-[#0f0f17] border-white/10'
+            }`}
+          >
             <div>
-              <p className="text-xs font-bold text-gray-200">Front Thumbnail (Picture)</p>
-              <p className="text-[10px] text-gray-400">{thumbnailFile ? thumbnailFile.name : 'Optional cover image'}</p>
+              <p className={`text-xs font-bold ${isBrightMode ? 'text-gray-800' : 'text-gray-200'}`}>
+                Front Thumbnail (Picture)
+              </p>
+              <p className={`text-[10px] ${isBrightMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                {thumbnailFile ? thumbnailFile.name : 'Optional cover image'}
+              </p>
             </div>
             <button
               type="button"
               onClick={() => thumbnailInputRef.current?.click()}
-              className="px-3.5 py-1.5 bg-white/5 border border-white/10 hover:border-[#B38728] rounded-xl text-xs text-[#FCF6BA] transition cursor-pointer"
+              className={`px-3.5 py-1.5 border rounded-xl text-xs font-bold transition cursor-pointer ${
+                isBrightMode
+                  ? 'bg-amber-100 border-amber-300 text-amber-800 hover:bg-amber-200'
+                  : 'bg-white/5 border-white/10 text-[#FCF6BA] hover:border-[#B38728]'
+              }`}
             >
               {thumbnailFile ? 'Change' : 'Choose'}
             </button>
@@ -377,26 +419,38 @@ export default function CreateVideoPostPage() {
 
           {/* Video Title Input */}
           <div className="space-y-1">
-            <label className="text-xs font-bold text-[#FCF6BA]">Video Title / Name</label>
+            <label className={`text-xs font-bold ${isBrightMode ? 'text-amber-700' : 'text-[#FCF6BA]'}`}>
+              Video Title / Name
+            </label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g., Introduction to Circuit Theory..."
-              className="w-full bg-[#0f0f17] border border-white/10 rounded-2xl p-3.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#FCF6BA]"
+              className={`w-full border rounded-2xl p-3.5 text-xs focus:outline-none ${
+                isBrightMode
+                  ? 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:border-amber-500'
+                  : 'bg-[#0f0f17] border-white/10 text-white placeholder-gray-500 focus:border-[#FCF6BA]'
+              }`}
             />
           </div>
 
           {/* Category Dropdown */}
           <div className="space-y-1">
-            <label className="text-xs font-bold text-[#FCF6BA]">Type of Video</label>
+            <label className={`text-xs font-bold ${isBrightMode ? 'text-amber-700' : 'text-[#FCF6BA]'}`}>
+              Type of Video
+            </label>
             <select
               value={videoCategory}
               onChange={(e) => setVideoCategory(e.target.value)}
-              className="w-full bg-[#0f0f17] border border-white/10 rounded-2xl p-3.5 text-xs text-white focus:outline-none focus:border-[#FCF6BA]"
+              className={`w-full border rounded-2xl p-3.5 text-xs focus:outline-none ${
+                isBrightMode
+                  ? 'bg-gray-50 border-gray-300 text-gray-900 focus:border-amber-500'
+                  : 'bg-[#0f0f17] border-white/10 text-white focus:border-[#FCF6BA]'
+              }`}
             >
               {VIDEO_CATEGORIES.map((cat) => (
-                <option key={cat} value={cat} className="bg-[#151622]">
+                <option key={cat} value={cat} className={isBrightMode ? 'bg-white text-gray-900' : 'bg-[#151622]'}>
                   {cat}
                 </option>
               ))}
@@ -405,37 +459,55 @@ export default function CreateVideoPostPage() {
 
           {/* Description Input */}
           <div className="space-y-1">
-            <label className="text-xs font-bold text-[#FCF6BA]">Description</label>
+            <label className={`text-xs font-bold ${isBrightMode ? 'text-amber-700' : 'text-[#FCF6BA]'}`}>
+              Description
+            </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Write a video description..."
               rows={4}
-              className="w-full bg-[#0f0f17] border border-white/10 rounded-2xl p-4 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#FCF6BA] resize-none"
+              className={`w-full border rounded-2xl p-4 text-xs resize-none focus:outline-none ${
+                isBrightMode
+                  ? 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:border-amber-500'
+                  : 'bg-[#0f0f17] border-white/10 text-white placeholder-gray-500 focus:border-[#FCF6BA]'
+              }`}
             />
           </div>
 
           {/* Footer Bar */}
-          <div className="flex justify-between items-center pt-3 border-t border-white/10">
+          <div className={`flex justify-between items-center pt-3 border-t ${isBrightMode ? 'border-gray-200' : 'border-white/10'}`}>
             <button
               type="button"
               onClick={handleOpenEditor}
-              className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold text-gray-300 transition cursor-pointer"
+              className={`flex items-center gap-2 px-4 py-2 border rounded-xl text-xs font-bold transition cursor-pointer ${
+                isBrightMode
+                  ? 'bg-gray-100 hover:bg-gray-200 border-gray-300 text-gray-700'
+                  : 'bg-white/5 hover:bg-white/10 border-white/10 text-gray-300'
+              }`}
             >
               <Image src="/compose.png" alt="Edit" width={18} height={18} className="object-contain w-4 h-4" unoptimized />
               Simple Edit
             </button>
 
-            {/* Bright Golden Send / Publish Button */}
+            {/* Send / Publish Button */}
             <button
               type="submit"
               disabled={!isPublishable}
               className="p-2 transition-transform hover:scale-110 active:scale-95 disabled:opacity-40 cursor-pointer bg-transparent border-none outline-none flex items-center justify-center"
               title="Publish Video Post"
             >
-              <div className="p-2 rounded-full bg-[#B38728]/20 border border-[#B38728] hover:bg-[#B38728]/40 shadow-[0_0_15px_rgba(252,246,186,0.5)] transition">
+              <div
+                className={`p-2 rounded-full border transition ${
+                  isBrightMode
+                    ? 'bg-amber-100 border-amber-500 hover:bg-amber-200 shadow-[0_0_15px_rgba(245,158,11,0.3)]'
+                    : 'bg-[#B38728]/20 border-[#B38728] hover:bg-[#B38728]/40 shadow-[0_0_15px_rgba(252,246,186,0.5)]'
+                }`}
+              >
                 <svg
-                  className="w-6 h-6 text-[#FCF6BA] transform rotate-45 -translate-x-0.5"
+                  className={`w-6 h-6 transform rotate-45 -translate-x-0.5 ${
+                    isBrightMode ? 'text-amber-700' : 'text-[#FCF6BA]'
+                  }`}
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
