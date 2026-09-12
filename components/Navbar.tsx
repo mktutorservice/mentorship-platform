@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import LinkNext from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
@@ -13,7 +13,6 @@ export default function Navbar() {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [mounted, setMounted] = useState<boolean>(false);
-  const [isVerified, setIsVerified] = useState<boolean>(false);
 
   useEffect(() => {
     setMounted(true);
@@ -41,31 +40,26 @@ export default function Navbar() {
     router.push('/login');
   };
 
-  const toggleVerification = () => {
-    setIsVerified((prev) => !prev);
-  };
-
-  if (pathname === '/' || pathname === '/login' || !mounted) {
+  if (!mounted || pathname === '/' || pathname === '/login') {
     return null;
   }
 
   const currentTheme = theme === 'system' ? resolvedTheme : theme;
   const isDark = currentTheme === 'dark';
 
-  // Golden color filter for icons
-  const goldenFilter = 'invert(58%) sepia(85%) saturate(389%) hue-rotate(9deg) brightness(92%) contrast(88%)';
+  const goldIconFilter = "invert(62%) sepia(43%) saturate(762%) hue-rotate(8deg) brightness(92%) contrast(88%)";
 
   return (
-    <nav className="sticky top-0 z-40 w-full bg-transparent py-4 px-4 md:px-6 flex items-center justify-between">
+    <nav className="sticky top-0 z-50 w-full py-2.5 px-3 sm:px-6 flex items-center justify-between border-b border-[#B38728]/30 bg-[#0b0c10] backdrop-blur-md">
       
-      {/* BRAND LOGO (LEFT) */}
-      <div className="flex-shrink-0 flex justify-start mr-4">
-        <Link href="/feed" className="flex items-center gap-2 group">
+      {/* BRAND LOGO */}
+      <div className="shrink-0 flex items-center mr-2">
+        <LinkNext href="/feed" className="flex items-center">
           <svg
             viewBox="0 0 470 32"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            className="h-6 md:h-7 w-auto"
+            className="h-4 sm:h-5 md:h-6 w-auto max-w-[100px] sm:max-w-[150px] md:max-w-none"
           >
             <path d="M5 2 V16 A6 6 0 0 0 17 16 V2" stroke="#B38728" strokeWidth="3.5" strokeLinecap="square" />
             <path d="M27 22 V2 L45 22 V2" stroke="#B38728" strokeWidth="3.5" strokeLinecap="square" strokeLinejoin="miter" />
@@ -86,187 +80,112 @@ export default function Navbar() {
             <path d="M430 22 V2 H442 A5 5 0 0 1 442 12 H430" stroke="#B38728" strokeWidth="3.5" strokeLinecap="square" />
             <rect x="452" y="18" width="4" height="4" fill="#B38728" />
           </svg>
-        </Link>
+        </LinkNext>
       </div>
 
-      {/* FLOATING CAPSULE NAVIGATION - FULL WIDTH */}
-      <div className="flex-1 flex justify-center">
-        <div className="flex items-center justify-between gap-1 sm:gap-3 px-4 py-2 rounded-full bg-[#151622]/40 backdrop-blur-xl border border-[#B38728]/30 shadow-[0_0_20px_rgba(179,135,40,0.1)] transition-all duration-300 w-full max-w-full">
-          
-          {/* HOME ICON */}
-          <Link 
-            href="/feed"
-            className={`relative p-1.5 rounded-full transition-all duration-200 ${
-              pathname === '/feed' 
-                ? 'bg-[#B38728]/25 shadow-[0_0_12px_rgba(179,135,40,0.4)] scale-105' 
-                : 'hover:bg-white/5 hover:scale-105'
-            }`}
-            title="Home Feed"
-          >
-            <Image 
-              src="/snow-house.png" 
-              alt="Home Feed" 
-              width={24} 
-              height={24} 
-              className="object-contain w-6 h-6"
-              style={{ filter: goldenFilter }}
-              priority
-            />
-            {pathname === '/feed' && (
-              <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-[#FCF6BA] rounded-full shadow-[0_0_6px_#FCF6BA]" />
-            )}
-          </Link>
+      {/* NAVIGATION ICONS */}
+      <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5 max-w-full">
+        
+        {/* HOME FEED */}
+        <LinkNext 
+          href="/feed"
+          className={`p-1.5 sm:p-2 rounded-xl border transition-all duration-200 shrink-0 ${
+            pathname === '/feed' 
+              ? 'bg-[#B38728]/25 border-[#B38728]' 
+              : 'bg-black/40 border-[#B38728]/30 hover:bg-black/60'
+          }`}
+          title="Home Feed"
+        >
+          <Image src="/snow-house.png" alt="Home" width={18} height={18} className="w-4 h-4 sm:w-5 sm:h-5 object-contain" />
+        </LinkNext>
 
-          {/* POSTS PAGE ICON */}
-          <Link 
-            href="/posts"
-            className={`relative p-1.5 rounded-full transition-all duration-200 ${
-              pathname === '/posts' 
-                ? 'bg-[#B38728]/25 shadow-[0_0_12px_rgba(179,135,40,0.4)] scale-105' 
-                : 'hover:bg-white/5 hover:scale-105'
-            }`}
-            title="Community Posts"
-          >
-            <Image 
-              src="/user-generated-content.png" 
-              alt="Community Posts" 
-              width={24} 
-              height={24} 
-              className="object-contain w-6 h-6"
-              style={{ filter: goldenFilter }}
-            />
-            {pathname === '/posts' && (
-              <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-[#FCF6BA] rounded-full shadow-[0_0_6px_#FCF6BA]" />
-            )}
-          </Link>
+        {/* POSTS */}
+        <LinkNext 
+          href="/posts"
+          className={`p-1.5 sm:p-2 rounded-xl border transition-all duration-200 shrink-0 ${
+            pathname === '/posts' 
+              ? 'bg-[#B38728]/25 border-[#B38728]' 
+              : 'bg-black/40 border-[#B38728]/30 hover:bg-black/60'
+          }`}
+          title="Community Posts"
+        >
+          <Image src="/user-generated-content.png" alt="Posts" width={18} height={18} className="w-4 h-4 sm:w-5 sm:h-5 object-contain" />
+        </LinkNext>
 
-          {/* PROFILE ICON */}
-          <Link
-            href="/profile"
-            className={`relative p-1.5 rounded-full transition-all duration-200 ${
-              pathname === '/profile' 
-                ? 'bg-[#B38728]/25 shadow-[0_0_12px_rgba(179,135,40,0.4)] scale-105' 
-                : 'hover:bg-white/5 hover:scale-105'
-            }`}
-            title="Profile"
-          >
-            <Image
-              src="/privacy.png"
-              alt="Profile"
-              width={24}
-              height={24}
-              className="object-contain w-6 h-6"
-              style={{ filter: goldenFilter }}
-              priority
-            />
-            {pathname === '/profile' && (
-              <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-[#FCF6BA] rounded-full shadow-[0_0_6px_#FCF6BA]" />
-            )}
-          </Link>
+        {/* PROFILE */}
+        <LinkNext
+          href="/profile"
+          className={`p-1.5 sm:p-2 rounded-xl border transition-all duration-200 shrink-0 ${
+            pathname === '/profile' 
+              ? 'bg-[#B38728]/25 border-[#B38728]' 
+              : 'bg-black/40 border-[#B38728]/30 hover:bg-black/60'
+          }`}
+          title="Profile"
+        >
+          <Image src="/privacy.png" alt="Profile" width={18} height={18} className="w-4 h-4 sm:w-5 sm:h-5 object-contain" />
+        </LinkNext>
 
-          {/* CREATE POST ICON */}
-          <button 
-            onClick={() => window.dispatchEvent(new CustomEvent('open-add-post-modal'))}
-            className="relative p-1.5 rounded-full hover:bg-white/5 hover:scale-105 transition-all duration-200 cursor-pointer"
-            title="Create Post Modal"
-          >
-            <Image 
-              src="/plus.png" 
-              alt="Add Post" 
-              width={24} 
-              height={24} 
-              className="object-contain w-6 h-6"
-              style={{ filter: goldenFilter }}
-            />
-          </button>
+        {/* ADD POST MODAL TRIGGER */}
+        <button 
+          onClick={() => window.dispatchEvent(new CustomEvent('open-add-post-modal'))}
+          className="p-1.5 sm:p-2 rounded-xl bg-black/40 border border-[#B38728]/30 hover:bg-black/60 transition-all duration-200 cursor-pointer shrink-0"
+          title="Create Post"
+        >
+          <Image src="/plus.png" alt="Add Post" width={18} height={18} className="w-4 h-4 sm:w-5 sm:h-5 object-contain" />
+        </button>
 
-          {/* CONTACTS ICON */}
-          <button 
-            onClick={() => window.dispatchEvent(new CustomEvent('open-contacts-modal'))}
-            className="relative p-1.5 rounded-full hover:bg-white/5 hover:scale-105 transition-all duration-200 cursor-pointer"
-            title="My Contacts"
-          >
-            <Image 
-              src="/contacts.png" 
-              alt="My Contacts" 
-              width={22} 
-              height={22} 
-              className="object-contain w-5.5 h-5.5"
-              style={{ filter: goldenFilter }}
-            />
-          </button>
+        {/* CONTACTS */}
+        <button 
+          onClick={() => window.dispatchEvent(new CustomEvent('open-contacts-modal'))}
+          className="p-1.5 sm:p-2 rounded-xl bg-black/40 border border-[#B38728]/30 hover:bg-black/60 transition-all duration-200 cursor-pointer shrink-0"
+          title="My Contacts"
+        >
+          <Image src="/contacts.png" alt="Contacts" width={18} height={18} className="w-4 h-4 sm:w-5 sm:h-5 object-contain" />
+        </button>
 
-          {/* VERIFICATION ICON */}
-          <button 
-            onClick={toggleVerification}
-            className="relative p-1.5 rounded-full hover:bg-white/5 hover:scale-105 transition-all duration-200 cursor-pointer"
-            title={isVerified ? "Account Verified" : "Verify Account"}
-          >
-            <Image 
-              src={isVerified ? "/verified.png" : "/unverified.png"} 
-              alt={isVerified ? "Verified User" : "Unverified User"} 
-              width={22} 
-              height={22} 
-              className="object-contain w-5.5 h-5.5"
-              style={{ filter: goldenFilter }}
-            />
-          </button>
-
-          {/* SETTINGS ICON */}
-          <button
-            onClick={() => window.dispatchEvent(new CustomEvent('toggle-profile-settings'))}
-            className="relative p-1.5 rounded-full hover:bg-white/5 hover:scale-105 transition-all duration-200 cursor-pointer"
-            title="Profile Settings"
-          >
-            <Image
-              src="/sett.png"
-              alt="Profile Settings"
-              width={24}
-              height={24}
-              className="object-contain w-6 h-6"
-              style={{ filter: goldenFilter }}
-              priority
-            />
-          </button>
-
-          {/* DAY / NIGHT MODE TOGGLE */}
-          <button
-            onClick={() => setTheme(isDark ? 'light' : 'dark')}
-            className="relative p-1.5 rounded-full hover:bg-white/5 hover:scale-105 transition-all duration-200 cursor-pointer"
-            title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-          >
-            <Image
-              src="/day-mode.png"
-              alt={isDark ? "Light Mode" : "Dark Mode"}
-              width={24}
-              height={24}
-              className="object-contain w-6 h-6"
-              style={{ filter: goldenFilter }}
-            />
-          </button>
-
-          {/* SIGN OUT ICON */}
-          <button
-            onClick={handleSignOut}
-            className="relative p-1.5 rounded-full hover:bg-white/5 hover:scale-105 transition-all duration-200 cursor-pointer"
-            title="Sign Out"
-          >
-            <Image
-              src="/logout.png"
-              alt="Sign Out"
-              width={24}
-              height={24}
-              className="object-contain w-6 h-6"
-              style={{ filter: goldenFilter }}
-            />
-          </button>
-
+        {/* VERIFIED BADGE */}
+        <div 
+          className="p-1.5 sm:p-2 rounded-xl bg-black/40 border border-[#B38728]/30 shrink-0"
+          title="Account Verified"
+        >
+          <Image src="/verified.png" alt="Verified User" width={18} height={18} className="w-4 h-4 sm:w-5 sm:h-5 object-contain" />
         </div>
+
+        {/* SETTINGS */}
+        <button
+          onClick={() => window.dispatchEvent(new CustomEvent('toggle-profile-settings'))}
+          className="p-1.5 sm:p-2 rounded-xl bg-black/40 border border-[#B38728]/30 hover:bg-black/60 transition-all duration-200 cursor-pointer shrink-0"
+          title="Profile Settings"
+        >
+          <Image src="/sett.png" alt="Settings" width={18} height={18} className="w-4 h-4 sm:w-5 sm:h-5 object-contain" />
+        </button>
+
+        {/* THEME TOGGLE */}
+        <button
+          onClick={() => setTheme(isDark ? 'light' : 'dark')}
+          className="p-1.5 sm:p-2 rounded-xl bg-black/40 border border-[#B38728]/30 hover:bg-black/60 transition-all duration-200 cursor-pointer shrink-0"
+          title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+        >
+          <Image src="/contrast.png" alt="Theme" width={18} height={18} className="w-4 h-4 sm:w-5 sm:h-5 object-contain" />
+        </button>
+
+        {/* SIGN OUT */}
+        <button
+          onClick={handleSignOut}
+          className="p-1.5 sm:p-2 rounded-xl bg-black/40 border border-[#B38728]/30 hover:bg-black/60 transition-all duration-200 cursor-pointer shrink-0"
+          title="Sign Out"
+        >
+          <Image 
+            src="/logout.png" 
+            alt="Sign Out" 
+            width={18} 
+            height={18} 
+            className="w-4 h-4 sm:w-5 sm:h-5 object-contain"
+            style={{ filter: goldIconFilter }}
+          />
+        </button>
+
       </div>
-
-      {/* RIGHT SIDE EMPTY SPACER */}
-      <div className="flex-shrink-0 w-8 md:w-12" />
-
     </nav>
   );
 }

@@ -93,7 +93,13 @@ export default function LandingPage() {
               className="p-2.5 rounded-xl bg-slate-200 dark:bg-white/10 text-slate-800 dark:text-white hover:scale-105 transition duration-300 border border-slate-300 dark:border-white/10"
               aria-label="Toggle Theme"
             >
-              {theme === 'dark' ? '☀️' : '🌙'}
+             <Image
+             src="/contrast.png"
+             alt="Toggle Contrast Theme"
+             width={22}
+             height={22}
+             className="object-contain w-5.5 h-5.5 dark:invert"
+             />
             </button>
           )}
 
